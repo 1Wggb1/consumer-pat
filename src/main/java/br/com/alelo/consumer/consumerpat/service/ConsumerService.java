@@ -1,21 +1,21 @@
 package br.com.alelo.consumer.consumerpat.service;
 
-import java.util.List;
-
 import org.springframework.data.domain.Pageable;
-import br.com.alelo.consumer.consumerpat.entity.Consumer;
+import br.com.alelo.consumer.consumerpat.dto.ConsumerPageableDTO;
+import br.com.alelo.consumer.consumerpat.dto.ConsumerRequestDTO;
+import br.com.alelo.consumer.consumerpat.dto.ConsumerResponseDTO;
 
 public interface ConsumerService
 {
-    Consumer create(
-        Consumer consumer );
+    ConsumerResponseDTO create(
+        ConsumerRequestDTO consumerRequestDTO );
 
-    List<Consumer> findConsumers(
+    ConsumerPageableDTO findConsumers(
         Pageable pageable );
 
-    Consumer update(
+    void update(
         Integer id,
-        Consumer consumer );
+        ConsumerRequestDTO consumerRequestDTO );
 
     void setBalance(
         Integer cardNumber,

@@ -1,7 +1,7 @@
 package br.com.alelo.consumer.consumerpat.controller;
 
 import java.net.URI;
-import java.util.List;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import br.com.alelo.consumer.consumerpat.entity.Consumer;
+import br.com.alelo.consumer.consumerpat.dto.ConsumerPageableDTO;
+import br.com.alelo.consumer.consumerpat.dto.ConsumerRequestDTO;
+import br.com.alelo.consumer.consumerpat.dto.ConsumerResponseDTO;
 import br.com.alelo.consumer.consumerpat.service.ConsumerService;
 import lombok.extern.log4j.Log4j2;
 
@@ -28,7 +30,7 @@ public class ConsumerController
     private ConsumerService service;
 
     @GetMapping
-    public ResponseEntity<List<Consumer>> findConsumers(
+    public ResponseEntity<ConsumerPageableDTO> findConsumers(
         @RequestParam( name = "page", defaultValue = "0" ) final Integer page,
         @RequestParam( name = "size", defaultValue = "10" ) final Integer size )
     {
@@ -37,12 +39,12 @@ public class ConsumerController
     }
 
     @PostMapping
-    public ResponseEntity<Consumer> createConsumer(
-        @RequestBody final Consumer consumer )
+    public ResponseEntity<ConsumerResponseDTO> createConsumer(
+        @Valid @RequestBody final ConsumerRequestDTO consumerRequestDTO )
     {
-        final Consumer createdConsumer = service.create( consumer );
+        final ConsumerResponseDTO createdConsumer = service.create( consumerRequestDTO );
         final URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-            .buildAndExpand( createdConsumer.getId() )
+            .buildAndExpand( createdConsumer.id() )
             .toUri();
         return ResponseEntity.created( location ).body( createdConsumer );
     }
@@ -50,9 +52,9 @@ public class ConsumerController
     @PutMapping( "/{id}" )
     public ResponseEntity<Void> updateConsumer(
         @PathVariable( "id" ) final Integer id,
-        @RequestBody final Consumer consumer )
+        @Valid @RequestBody final ConsumerRequestDTO consumerRequestDTO )
     {
-        service.update( id, consumer );
+        service.update( id, consumerRequestDTO );
         return ResponseEntity.noContent().build();
     }
 
