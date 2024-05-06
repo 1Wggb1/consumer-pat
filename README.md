@@ -13,7 +13,7 @@ Então, esteja preparado para mostrar suas habilidades e sua capacidade de tomar
 
 ## Requisitos para executar o projeto
 
-* JDK `11` ou `17`
+* JDK `17`
 
 ## Orientações 
 

@@ -1,5 +1,7 @@
 package br.com.alelo.consumer.consumerpat.entity;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 
 import javax.persistence.Entity;
@@ -62,5 +64,4 @@ public class Consumer {
             && Objects.equals(email, consumer.email) && Objects.equals(street, consumer.street) && Objects.equals(city, consumer.city)
             && Objects.equals(country, consumer.country);
     }
-
 }
