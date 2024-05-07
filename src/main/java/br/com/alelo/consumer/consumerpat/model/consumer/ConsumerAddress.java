@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.model;
+package br.com.alelo.consumer.consumerpat.model.consumer;
 
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotEmpty;

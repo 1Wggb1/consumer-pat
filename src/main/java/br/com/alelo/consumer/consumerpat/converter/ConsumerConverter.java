@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
-import br.com.alelo.consumer.consumerpat.model.PersistentConsumer;
+import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
 
 public interface ConsumerConverter
 {

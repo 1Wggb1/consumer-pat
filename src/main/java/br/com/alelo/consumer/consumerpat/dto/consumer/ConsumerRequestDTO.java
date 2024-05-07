@@ -5,8 +5,8 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.br.CPF;
-import br.com.alelo.consumer.consumerpat.model.ConsumerAddress;
-import br.com.alelo.consumer.consumerpat.model.ConsumerContact;
+import br.com.alelo.consumer.consumerpat.model.consumer.ConsumerAddress;
+import br.com.alelo.consumer.consumerpat.model.consumer.ConsumerContact;
 
 public record ConsumerRequestDTO(
     @NotEmpty( message = "Field name cannot be empty or null." ) String name,

@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.model;
+package br.com.alelo.consumer.consumerpat.model.consumer;
 
 import java.time.LocalDate;
 import javax.persistence.Column;

@@ -58,25 +58,4 @@ public class ConsumerController
         service.update( id, consumerRequestDTO );
         return ResponseEntity.noContent().build();
     }
-
-    @PutMapping( "/cardbalance" )
-    public ResponseEntity<Void> setBalance(
-        final Integer cardNumber,
-        final Double value )
-    {
-        service.setBalance( cardNumber, value );
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping( "/buy" )
-    public ResponseEntity<Void> buy(
-        final Integer establishmentType,
-        final String establishmentName,
-        final Integer cardNumber,
-        final String productDescription,
-        final Double value )
-    {
-        service.buy( establishmentType, establishmentName, cardNumber, productDescription, value );
-        return ResponseEntity.ok().build();
-    }
 }

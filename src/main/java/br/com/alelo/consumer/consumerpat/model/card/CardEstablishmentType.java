@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.model;
+package br.com.alelo.consumer.consumerpat.model.card;
 
 public enum CardEstablishmentType
 {

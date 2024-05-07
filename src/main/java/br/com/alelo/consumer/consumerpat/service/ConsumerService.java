@@ -17,15 +17,4 @@ public interface ConsumerService
     void update(
         Integer id,
         ConsumerRequestDTO consumerRequestDTO );
-
-    void setBalance(
-        Integer cardNumber,
-        Double value );
-
-    void buy(
-        Integer establishmentType,
-        String establishmentName,
-        Integer cardNumber,
-        String productDescription,
-        Double value );
 }

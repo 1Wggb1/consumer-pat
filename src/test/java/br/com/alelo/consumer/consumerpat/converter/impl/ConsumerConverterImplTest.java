@@ -22,9 +22,9 @@ import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.PageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
-import br.com.alelo.consumer.consumerpat.model.ConsumerAddress;
-import br.com.alelo.consumer.consumerpat.model.ConsumerContact;
-import br.com.alelo.consumer.consumerpat.model.PersistentConsumer;
+import br.com.alelo.consumer.consumerpat.model.consumer.ConsumerAddress;
+import br.com.alelo.consumer.consumerpat.model.consumer.ConsumerContact;
+import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
 
 class ConsumerConverterImplTest
 {

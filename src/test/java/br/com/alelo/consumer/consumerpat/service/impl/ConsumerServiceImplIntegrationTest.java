@@ -37,8 +37,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.alelo.consumer.consumerpat.dto.PageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerResponseDTO;
-import br.com.alelo.consumer.consumerpat.model.ConsumerContact;
-import br.com.alelo.consumer.consumerpat.model.PersistentConsumer;
+import br.com.alelo.consumer.consumerpat.model.consumer.ConsumerContact;
+import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
 import br.com.alelo.consumer.consumerpat.repository.ConsumerRepository;
 
 @ExtendWith( SpringExtension.class )
