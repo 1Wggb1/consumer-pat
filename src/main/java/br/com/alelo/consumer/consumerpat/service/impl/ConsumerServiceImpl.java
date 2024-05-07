@@ -7,9 +7,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import br.com.alelo.consumer.consumerpat.converter.ConsumerConverter;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerPageableDTO;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerRequestDTO;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerResponseDTO;
+import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
+import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerDTO;
+import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
+import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerResponseDTO;
 import br.com.alelo.consumer.consumerpat.exception.ConsumerNotFoundException;
 import br.com.alelo.consumer.consumerpat.model.PersistentCardSpending;
 import br.com.alelo.consumer.consumerpat.model.PersistentConsumer;
@@ -52,7 +53,7 @@ public class ConsumerServiceImpl
     }
 
     @Override
-    public ConsumerPageableDTO findConsumers(
+    public EntityPageableDTO<ConsumerDTO> findConsumers(
         final Pageable pageable )
     {
         final UUID traceId = UUID.randomUUID();

@@ -1,6 +1,6 @@
 package br.com.alelo.consumer.consumerpat;
 
-import br.com.alelo.consumer.consumerpat.dto.ConsumerRequestDTO;
+import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.model.ConsumerAddress;
 import br.com.alelo.consumer.consumerpat.model.ConsumerContact;
 

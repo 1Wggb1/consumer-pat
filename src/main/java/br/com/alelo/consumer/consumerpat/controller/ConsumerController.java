@@ -15,22 +15,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerPageableDTO;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerRequestDTO;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerResponseDTO;
+import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
+import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerDTO;
+import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
+import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerResponseDTO;
 import br.com.alelo.consumer.consumerpat.service.ConsumerService;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RestController
-@RequestMapping( "v1/consumers" )
+@RequestMapping( "/v1/consumers" )
 public class ConsumerController
 {
     @Autowired
     private ConsumerService service;
 
     @GetMapping
-    public ResponseEntity<ConsumerPageableDTO> findConsumers(
+    public ResponseEntity<EntityPageableDTO<ConsumerDTO>> findConsumers(
         @RequestParam( name = "page", defaultValue = "0" ) final Integer page,
         @RequestParam( name = "size", defaultValue = "10" ) final Integer size )
     {

@@ -3,9 +3,9 @@ package br.com.alelo.consumer.consumerpat.converter;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerDTO;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerPageableDTO;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerRequestDTO;
+import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
+import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerDTO;
+import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.model.PersistentConsumer;
 
 public interface ConsumerConverter
@@ -17,7 +17,7 @@ public interface ConsumerConverter
         PersistentConsumer persistentConsumer,
         ConsumerRequestDTO consumerRequestDTO );
 
-    ConsumerPageableDTO toPageableDTO(
+    EntityPageableDTO<ConsumerDTO> toPageableDTO(
         Page<PersistentConsumer> consumersPage );
 
     ConsumerDTO toDTO(

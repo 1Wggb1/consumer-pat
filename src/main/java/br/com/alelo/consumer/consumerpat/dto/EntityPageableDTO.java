@@ -2,8 +2,8 @@ package br.com.alelo.consumer.consumerpat.dto;
 
 import java.util.List;
 
-public record ConsumerPageableDTO(
+public record EntityPageableDTO<T>(
     PageableDTO pageable,
-    List<ConsumerDTO> elements )
+    List<T> elements )
 {
 }

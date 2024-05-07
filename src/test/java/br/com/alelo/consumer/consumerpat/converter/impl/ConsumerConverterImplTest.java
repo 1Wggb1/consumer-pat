@@ -18,9 +18,10 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerPageableDTO;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerRequestDTO;
+import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.PageableDTO;
+import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerDTO;
+import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.model.ConsumerAddress;
 import br.com.alelo.consumer.consumerpat.model.ConsumerContact;
 import br.com.alelo.consumer.consumerpat.model.PersistentConsumer;
@@ -112,14 +113,14 @@ class ConsumerConverterImplTest
                 createDefaultPersistent( 2 ).build() ),
             pageRequest, totalElements );
 
-        final ConsumerPageableDTO consumerPageableDTO = subject.toPageableDTO( persistentConsumerPage );
+        final EntityPageableDTO<ConsumerDTO> entityPageableDTO = subject.toPageableDTO( persistentConsumerPage );
 
-        final PageableDTO pageable = consumerPageableDTO.pageable();
+        final PageableDTO pageable = entityPageableDTO.pageable();
         assertEquals( pageRequest.getPageNumber(), pageable.page() );
         assertEquals( pageRequest.getPageSize(), pageable.size() );
         assertEquals( 2, pageable.numberOfElements() );
         assertEquals( 3, pageable.totalPages() );
         assertEquals( totalElements, pageable.totalElements() );
-        assertEquals( 2, consumerPageableDTO.elements().size() );
+        assertEquals( 2, entityPageableDTO.elements().size() );
     }
 }

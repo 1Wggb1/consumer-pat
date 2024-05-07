@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.dto;
+package br.com.alelo.consumer.consumerpat.dto.consumer;
 
 import java.time.LocalDate;
 

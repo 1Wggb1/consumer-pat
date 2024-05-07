@@ -6,10 +6,10 @@ import java.time.format.DateTimeFormatter;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import br.com.alelo.consumer.consumerpat.converter.ConsumerConverter;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerDTO;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerPageableDTO;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerRequestDTO;
+import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.PageableDTO;
+import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerDTO;
+import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.model.PersistentConsumer;
 import br.com.alelo.consumer.consumerpat.util.UnmaskUtil;
 
@@ -43,7 +43,7 @@ public class ConsumerConverterImpl
     }
 
     @Override
-    public ConsumerPageableDTO toPageableDTO(
+    public EntityPageableDTO<ConsumerDTO> toPageableDTO(
         final Page<PersistentConsumer> consumersPage )
     {
         final PageableDTO pageableDTO = new PageableDTO(
@@ -52,7 +52,7 @@ public class ConsumerConverterImpl
             consumersPage.getNumberOfElements(),
             consumersPage.getTotalPages(),
             (int) consumersPage.getTotalElements() );
-        return new ConsumerPageableDTO( pageableDTO, toConsumerDTO( consumersPage.getContent() ) );
+        return new EntityPageableDTO<>( pageableDTO, toConsumerDTO( consumersPage.getContent() ) );
     }
 
     @Override
