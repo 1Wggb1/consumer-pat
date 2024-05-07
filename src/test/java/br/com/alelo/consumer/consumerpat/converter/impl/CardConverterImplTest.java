@@ -18,7 +18,7 @@ import br.com.alelo.consumer.consumerpat.dto.PageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
-import br.com.alelo.consumer.consumerpat.exception.CardEstablishmentTypeNotFoundException;
+import br.com.alelo.consumer.consumerpat.exception.card.CardEstablishmentTypeNotFoundException;
 import br.com.alelo.consumer.consumerpat.model.card.CardEstablishmentType;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentConsumerCard;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;

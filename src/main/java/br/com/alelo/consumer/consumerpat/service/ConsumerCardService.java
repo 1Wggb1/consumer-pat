@@ -2,6 +2,7 @@ package br.com.alelo.consumer.consumerpat.service;
 
 import org.springframework.data.domain.Pageable;
 import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
+import br.com.alelo.consumer.consumerpat.dto.card.CardCreditBalanceRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceResponseDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
@@ -27,7 +28,7 @@ public interface ConsumerCardService
     void creditCardBalance(
         Integer consumerId,
         Integer cardId,
-        Long creditValue );
+        CardCreditBalanceRequestDTO creditBalanceRequestDTO );
 
     CardDebitBalanceResponseDTO debitCardBalance(
         Integer consumerId,

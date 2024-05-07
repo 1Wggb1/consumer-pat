@@ -2,7 +2,7 @@ package br.com.alelo.consumer.consumerpat.model.card;
 
 import java.util.Arrays;
 
-import br.com.alelo.consumer.consumerpat.exception.CardEstablishmentTypeNotFoundException;
+import br.com.alelo.consumer.consumerpat.exception.card.CardEstablishmentTypeNotFoundException;
 
 public enum CardEstablishmentType
 {

@@ -11,7 +11,7 @@ import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerResponseDTO;
-import br.com.alelo.consumer.consumerpat.exception.ConsumerNotFoundException;
+import br.com.alelo.consumer.consumerpat.exception.consumer.ConsumerNotFoundException;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
 import br.com.alelo.consumer.consumerpat.repository.CardSpendingRepository;
 import br.com.alelo.consumer.consumerpat.repository.ConsumerRepository;

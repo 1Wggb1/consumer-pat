@@ -9,16 +9,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import br.com.alelo.consumer.consumerpat.converter.CardConverter;
 import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
+import br.com.alelo.consumer.consumerpat.dto.card.CardCreditBalanceRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceResponseDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardResponseDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
-import br.com.alelo.consumer.consumerpat.exception.CardInvalidConsumerException;
-import br.com.alelo.consumer.consumerpat.exception.CardNotFoundException;
-import br.com.alelo.consumer.consumerpat.exception.ConsumerCardsNotFoundException;
-import br.com.alelo.consumer.consumerpat.exception.ConsumerNotFoundException;
+import br.com.alelo.consumer.consumerpat.exception.card.CardInvalidConsumerException;
+import br.com.alelo.consumer.consumerpat.exception.card.CardNumberAlreadyExists;
+import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardNotFoundException;
+import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardsNotFoundException;
+import br.com.alelo.consumer.consumerpat.exception.consumer.ConsumerNotFoundException;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentConsumerCard;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
 import br.com.alelo.consumer.consumerpat.repository.CardRepository;
@@ -51,10 +53,20 @@ public class ConsumerCardServiceImpl
     {
         log.info( "Creating... card to consumer id = {}", consumerId );
         final PersistentConsumer persistentConsumer = findConsumerOrThrownException( consumerId );
+        validateIfUniqueCardNumber( consumerCardDTO.number() );
         final PersistentConsumerCard savedPersistent = cardRepository.save( cardConverter.toModel( consumerCardDTO, persistentConsumer ) );
         log.info( "Consumer with id = {} had card with id = {} created successfully",
             consumerId, savedPersistent.getId() );
         return cardConverter.toResponseDTO( savedPersistent );
+    }
+
+    private void validateIfUniqueCardNumber(
+        final Long cardNumber )
+    {
+        final boolean existByCardNumber = cardRepository.existsByNumber( cardNumber );
+        if( existByCardNumber ) {
+            throw new CardNumberAlreadyExists();
+        }
     }
 
     private PersistentConsumer findConsumerOrThrownException(
@@ -73,7 +85,8 @@ public class ConsumerCardServiceImpl
     {
         log.info( "Updating... card to consumer id = {}", consumerId );
         final PersistentConsumerCard persistentConsumerCard = cardRepository.findById( cardId )
-            .orElseThrow( () -> new CardNotFoundException( cardId ) );
+            .orElseThrow( () -> new ConsumerCardNotFoundException( cardId ) );
+        validateIfUniqueCardNumber( cardUpdateRequestDTO.number() );
         final Integer cardConsumerId = persistentConsumerCard.getConsumer().getId();
         validateConsumerId( consumerId, cardConsumerId );
         log.info( "Consumer with id = {} had card with id = {} updated successfully",
@@ -111,40 +124,22 @@ public class ConsumerCardServiceImpl
         }
     }
 
-    /*
-     * Credito de valor no cartão cardNumber: número do cartão value: valor a
-     * ser creditado (adicionado ao saldo)
-     */
     @Override
     @Transactional
     public void creditCardBalance(
         final Integer consumerId,
         final Integer cardId,
-        final Long creditValue )
+        final CardCreditBalanceRequestDTO creditBalanceRequestDTO )
     {
-        final PersistentConsumer consumer = null;
-        // consumer = repository.findByDrugstoreNumber( cardNumber );
-
-        if( consumer != null ) {
-            // é cartão de farmácia
-            // consumer.setDrugstoreCardBalance(
-            // consumer.getDrugstoreCardBalance() + value );
-            // repository.save( consumer );
-        } else {
-            // consumer = repository.findByFoodCardNumber( cardNumber );
-            if( consumer != null ) {
-                // é cartão de refeição
-                // consumer.setFoodCardBalance( consumer.getFoodCardBalance() +
-                // value );
-                // repository.save( consumer );
-            } else {
-                // É cartão de combustivel
-                // consumer = repository.findByFuelCardNumber( cardNumber );
-                // consumer.setFuelCardBalance( consumer.getFuelCardBalance() +
-                // value );
-                // repository.save( consumer );
-            }
-        }
+        log.info( "Adding credit value.... to consumer id = {} and card id= {}", consumerId, cardId );
+        final PersistentConsumerCard consumerCard = cardRepository
+            .findByIdAndConsumerId( cardId, consumerId )
+            .orElseThrow( () -> new ConsumerCardNotFoundException( cardId ) );
+        final Long creditCents = creditBalanceRequestDTO.creditCents();
+        consumerCard.addCredit( creditCents );
+        cardRepository.save( consumerCard );
+        log.info( "Credit value = {} added successfully to consumer id = {} and card id = {}",
+            creditCents, consumerId, cardId );
     }
 
     // Criar modelo

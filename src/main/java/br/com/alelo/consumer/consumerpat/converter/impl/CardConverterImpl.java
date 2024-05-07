@@ -1,5 +1,7 @@
 package br.com.alelo.consumer.consumerpat.converter.impl;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 import br.com.alelo.consumer.consumerpat.converter.CardConverter;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
@@ -22,7 +24,7 @@ public class CardConverterImpl
     {
         return PersistentConsumerCard.builder()
             .number( consumerCardRequestDTO.number() )
-            .balanceCents( consumerCardRequestDTO.balanceValueCents() )
+            .balanceCents( Optional.ofNullable( consumerCardRequestDTO.balanceValueCents() ).orElse( 0L ) )
             .consumer( persistentConsumer )
             .establishmentType( CardEstablishmentType.getOrThrownException( consumerCardRequestDTO.cardEstablishmentType() ) )
             .build();

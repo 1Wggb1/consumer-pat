@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
+import br.com.alelo.consumer.consumerpat.dto.card.CardCreditBalanceRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceResponseDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
@@ -28,7 +29,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @RestController
 @RequestMapping( "/v1/consumers/{consumer_id}/cards" )
-public class ConsumerCarController
+public class ConsumerCardController
 {
     @Autowired
     private ConsumerCardService service;
@@ -69,9 +70,9 @@ public class ConsumerCarController
     public ResponseEntity<Void> creditCardBalance(
         @PathVariable( "consumer_id" ) final Integer consumerId,
         @PathVariable( "card_id" ) final Integer cardId,
-        @RequestParam( "credit_value" ) final Long creditValue )
+        @Valid @RequestBody final CardCreditBalanceRequestDTO creditBalanceRequestDTO )
     {
-        service.creditCardBalance( consumerId, cardId, creditValue );
+        service.creditCardBalance( consumerId, cardId, creditBalanceRequestDTO );
         return ResponseEntity.noContent().build();
     }
 

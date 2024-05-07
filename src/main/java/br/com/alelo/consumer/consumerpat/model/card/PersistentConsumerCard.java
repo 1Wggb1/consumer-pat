@@ -11,8 +11,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
+import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardInvalidCreditValueException;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,10 +33,10 @@ public class PersistentConsumerCard
     private Integer id;
 
     @NotNull
-    @Column( name = "number", nullable = false )
+    @Column( name = "number", nullable = false, unique = true )
     private Long number;
 
-    @Positive
+    @PositiveOrZero
     @Column( name = "balance_cents" )
     private Long balanceCents;
 
@@ -48,4 +49,32 @@ public class PersistentConsumerCard
     @ManyToOne
     @JoinColumn( name = "consumer_id", nullable = false )
     private PersistentConsumer consumer;
+
+    public void setId(
+        final Integer id )
+    {
+        throw new UnsupportedOperationException( "Id cannot be changed." );
+    }
+
+    public void addCredit(
+        final Long creditCents )
+    {
+        validateBalance( creditCents );
+        this.balanceCents += creditCents;
+    }
+
+    private void validateBalance(
+        final Long creditCents )
+    {
+        if( creditCents == null || creditCents < 0 ) {
+            throw new ConsumerCardInvalidCreditValueException( id, consumer.getId() );
+        }
+    }
+
+    public void setBalanceCents(
+        final Long balanceCents )
+    {
+        validateBalance( balanceCents );
+        this.balanceCents += balanceCents;
+    }
 }
