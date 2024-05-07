@@ -48,6 +48,12 @@ public class PersistentConsumer
     @Embedded
     private ConsumerAddress address;
 
+    public void setId(
+        final Integer id )
+    {
+        throw new UnsupportedOperationException( "Id cannot be changed." );
+    }
+
     public void setDocumentNumber(
         final String documentNumber )
     {

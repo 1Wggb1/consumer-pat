@@ -8,6 +8,8 @@ public interface TestData
 {
     String VALID_DOCUMENT_NUMBER = "995.831.410-03";
     String VALID_DOCUMENT_NUMBER_WITHOUT_MASK = "99583141003";
+    String SECOND_VALID_DOCUMENT_NUMBER = "794.868.610-05";
+    String SECOND_VALID_DOCUMENT_NUMBER_WITHOUT_MASK = "79486861005";
     ConsumerContact CONSUMER_CONTACT = new ConsumerContact( 551789666666L,
         7789955566L,
         "joao@email.com" );

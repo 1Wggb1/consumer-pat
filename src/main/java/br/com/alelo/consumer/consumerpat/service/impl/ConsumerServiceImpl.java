@@ -35,18 +35,19 @@ public class ConsumerServiceImpl
     public ConsumerResponseDTO create(
         final ConsumerRequestDTO consumerRequestDTO )
     {
+        final UUID traceId = UUID.randomUUID();
         final String documentNumber = consumerRequestDTO.documentNumber();
-        logWithTrace( String.format( "Creating consumer with documentNumber = %s...", documentNumber ) );
+        logWithTrace( traceId, String.format( "Creating consumer with documentNumber = %s...", documentNumber ) );
         final PersistentConsumer saved = repository.save( converter.toModel( consumerRequestDTO ) );
-        logWithTrace( String.format( "Consumer with  id = %d and  documentNumber = %s created successfully!",
+        logWithTrace( traceId, String.format( "Consumer with  id = %d and  documentNumber = %s created successfully!",
             saved.getId(), documentNumber ) );
         return new ConsumerResponseDTO( saved.getId() );
     }
 
     private static void logWithTrace(
+        final UUID traceId,
         final String logMessage )
     {
-        final UUID traceId = UUID.randomUUID();
         log.info( "TRACEID = {} - {}", traceId, logMessage );
     }
 
@@ -54,9 +55,10 @@ public class ConsumerServiceImpl
     public ConsumerPageableDTO findConsumers(
         final Pageable pageable )
     {
-        logWithTrace( String.format( "Finding consumers by %s", pageable ) );
+        final UUID traceId = UUID.randomUUID();
+        logWithTrace( traceId, String.format( "Finding consumers by %s", pageable ) );
         final Page<PersistentConsumer> consumersPage = repository.findAll( pageable );
-        logWithTrace( String.format( "Consumers found by %s", pageable ) );
+        logWithTrace( traceId, String.format( "Consumers found by %s", pageable ) );
         return converter.toPageableDTO( consumersPage );
     }
 
@@ -67,12 +69,13 @@ public class ConsumerServiceImpl
         final Integer id,
         final ConsumerRequestDTO consumerRequestDTO )
     {
-        logWithTrace( String.format( "Updating consumer by id = %d", id ) );
+        final UUID traceId = UUID.randomUUID();
+        logWithTrace( traceId, String.format( "Updating consumer by id = %d", id ) );
         final PersistentConsumer persistentConsumer = repository.findById( id )
             .orElseThrow( () -> new ConsumerNotFoundException( id ) );
         final PersistentConsumer updatedConsumer = converter.toModel( persistentConsumer, consumerRequestDTO );
         repository.save( updatedConsumer );
-        logWithTrace( String.format( "Consumer with id = %d updated successfully!", id ) );
+        logWithTrace( traceId, String.format( "Consumer with id = %d updated successfully!", id ) );
     }
 
     /*
