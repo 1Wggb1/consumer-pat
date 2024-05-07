@@ -1,6 +1,6 @@
 package br.com.alelo.consumer.consumerpat.dto;
 
-import java.time.LocalDate;
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -9,10 +9,11 @@ import br.com.alelo.consumer.consumerpat.model.ConsumerAddress;
 import br.com.alelo.consumer.consumerpat.model.ConsumerContact;
 
 public record ConsumerRequestDTO(
-    @NotEmpty String name,
-    @NotNull @CPF String documentNumber,
-    LocalDate birthday,
-    @NotNull ConsumerContact contact,
-    @NotNull ConsumerAddress address )
+    @NotEmpty( message = "Field name cannot be empty or null." ) String name,
+    @NotEmpty( message = "Field documentNumber cannot be empty or null." ) @CPF(
+        message = "Field documentNumber should be a valid CPF." ) String documentNumber,
+    String birthday,
+    @Valid @NotNull( message = "Field contact cannot be null." ) ConsumerContact contact,
+    @Valid @NotNull( message = "Field address cannot be null." ) ConsumerAddress address )
 {
 }

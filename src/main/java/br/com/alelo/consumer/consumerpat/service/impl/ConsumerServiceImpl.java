@@ -1,22 +1,24 @@
 package br.com.alelo.consumer.consumerpat.service.impl;
 
-import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import br.com.alelo.consumer.consumerpat.dto.ConsumerDTO;
+import br.com.alelo.consumer.consumerpat.converter.ConsumerConverter;
 import br.com.alelo.consumer.consumerpat.dto.ConsumerPageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.ConsumerResponseDTO;
-import br.com.alelo.consumer.consumerpat.dto.PageableDTO;
+import br.com.alelo.consumer.consumerpat.exception.ConsumerNotFoundException;
 import br.com.alelo.consumer.consumerpat.model.PersistentCardSpending;
 import br.com.alelo.consumer.consumerpat.model.PersistentConsumer;
 import br.com.alelo.consumer.consumerpat.repository.CardSpendingRepository;
 import br.com.alelo.consumer.consumerpat.repository.ConsumerRepository;
 import br.com.alelo.consumer.consumerpat.service.ConsumerService;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 @Service
 public class ConsumerServiceImpl
     implements
@@ -25,54 +27,37 @@ public class ConsumerServiceImpl
     @Autowired
     private ConsumerRepository repository;
     @Autowired
+    private ConsumerConverter converter;
+    @Autowired
     private CardSpendingRepository cardSpendingRepository;
 
     @Override
     public ConsumerResponseDTO create(
         final ConsumerRequestDTO consumerRequestDTO )
     {
-        final PersistentConsumer persistentConsumer = PersistentConsumer.builder()
-            .name( consumerRequestDTO.name() )
-            .documentNumber( consumerRequestDTO.documentNumber() )
-            .birthday( consumerRequestDTO.birthday() )
-            .contact( consumerRequestDTO.contact() )
-            .address( consumerRequestDTO.address() )
-            .build();
-        final PersistentConsumer saved = repository.save( persistentConsumer );
+        final String documentNumber = consumerRequestDTO.documentNumber();
+        logWithTrace( String.format( "Creating consumer with documentNumber = %s...", documentNumber ) );
+        final PersistentConsumer saved = repository.save( converter.toModel( consumerRequestDTO ) );
+        logWithTrace( String.format( "Consumer with  id = %d and  documentNumber = %s created successfully!",
+            saved.getId(), documentNumber ) );
         return new ConsumerResponseDTO( saved.getId() );
+    }
+
+    private static void logWithTrace(
+        final String logMessage )
+    {
+        final UUID traceId = UUID.randomUUID();
+        log.info( "TRACEID = {} - {}", traceId, logMessage );
     }
 
     @Override
     public ConsumerPageableDTO findConsumers(
         final Pageable pageable )
     {
+        logWithTrace( String.format( "Finding consumers by %s", pageable ) );
         final Page<PersistentConsumer> consumersPage = repository.findAll( pageable );
-        final PageableDTO pageableDTO = new PageableDTO(
-            consumersPage.getNumber(),
-            consumersPage.getSize(),
-            consumersPage.getNumberOfElements(),
-            consumersPage.getTotalPages(),
-            (int) consumersPage.getTotalElements() );
-        return new ConsumerPageableDTO( pageableDTO, toConsumerDTO( consumersPage.getContent() ) );
-    }
-
-    private static List<ConsumerDTO> toConsumerDTO(
-        final List<PersistentConsumer> persistentConsumers )
-    {
-        return persistentConsumers.stream()
-            .map( ConsumerServiceImpl::toConsumerDTO )
-            .toList();
-    }
-
-    private static ConsumerDTO toConsumerDTO(
-        final PersistentConsumer persistentConsumer )
-    {
-        return new ConsumerDTO( persistentConsumer.getId(),
-            persistentConsumer.getName(),
-            persistentConsumer.getDocumentNumber(),
-            persistentConsumer.getBirthday(),
-            persistentConsumer.getContact(),
-            persistentConsumer.getAddress() );
+        logWithTrace( String.format( "Consumers found by %s", pageable ) );
+        return converter.toPageableDTO( consumersPage );
     }
 
     // Atualizar cliente, lembrando que não deve ser possível alterar o saldo do
@@ -82,14 +67,12 @@ public class ConsumerServiceImpl
         final Integer id,
         final ConsumerRequestDTO consumerRequestDTO )
     {
+        logWithTrace( String.format( "Updating consumer by id = %d", id ) );
         final PersistentConsumer persistentConsumer = repository.findById( id )
-            .orElseThrow();
-        persistentConsumer.setName( consumerRequestDTO.name() );
-        persistentConsumer.setBirthday( consumerRequestDTO.birthday() );
-        persistentConsumer.setDocumentNumber( consumerRequestDTO.documentNumber() );
-        persistentConsumer.setContact( consumerRequestDTO.contact() );
-        persistentConsumer.setAddress( consumerRequestDTO.address() );
-        repository.save( persistentConsumer );
+            .orElseThrow( () -> new ConsumerNotFoundException( id ) );
+        final PersistentConsumer updatedConsumer = converter.toModel( persistentConsumer, consumerRequestDTO );
+        repository.save( updatedConsumer );
+        logWithTrace( String.format( "Consumer with id = %d updated successfully!", id ) );
     }
 
     /*
@@ -128,6 +111,7 @@ public class ConsumerServiceImpl
 
     // Criar modelo
     // Criar enum com tipo do estabelecimento
+    // enum ter o algoritmo para calculo de taxa
     /*
      * Débito de valor no cartão (compra) establishmentType: tipo do
      * estabelecimento comercial establishmentName: nome do estabelecimento
