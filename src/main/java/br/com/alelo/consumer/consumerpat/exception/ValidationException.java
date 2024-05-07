@@ -2,11 +2,11 @@ package br.com.alelo.consumer.consumerpat.exception;
 
 import org.springframework.http.HttpStatus;
 
-public abstract class ConsumerValidationException
+public abstract class ValidationException
     extends
         RuntimeException
 {
-    public ConsumerValidationException(
+    public ValidationException(
         final String message )
     {
         super( message );

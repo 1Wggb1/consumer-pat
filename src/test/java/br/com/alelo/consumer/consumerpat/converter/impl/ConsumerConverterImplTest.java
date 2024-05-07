@@ -28,7 +28,6 @@ import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
 
 class ConsumerConverterImplTest
 {
-
     private final ConsumerConverterImpl subject = new ConsumerConverterImpl();
 
     @Test

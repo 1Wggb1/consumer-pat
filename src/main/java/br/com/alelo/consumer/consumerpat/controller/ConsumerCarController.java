@@ -3,6 +3,8 @@ package br.com.alelo.consumer.consumerpat.controller;
 import java.net.URI;
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +18,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceResponseDTO;
+import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
+import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardResponseDTO;
+import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
 import br.com.alelo.consumer.consumerpat.service.ConsumerCardService;
 import lombok.extern.log4j.Log4j2;
 
@@ -25,34 +30,39 @@ import lombok.extern.log4j.Log4j2;
 @RequestMapping( "/v1/consumers/{consumer_id}/cards" )
 public class ConsumerCarController
 {
+    @Autowired
     private ConsumerCardService service;
 
     @PostMapping
-    public ResponseEntity<CardDebitBalanceResponseDTO> createCard(
+    public ResponseEntity<ConsumerCardResponseDTO> createCard(
         @PathVariable( "consumer_id" ) final Integer consumerId,
         @Valid @RequestBody final ConsumerCardRequestDTO consumerCardDTO )
     {
-        final CardDebitBalanceResponseDTO responseDTO = service.createCard( consumerId, consumerCardDTO );
+        final ConsumerCardResponseDTO responseDTO = service.createCard( consumerId, consumerCardDTO );
         final URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-            .buildAndExpand( responseDTO.transactionId() )
+            .buildAndExpand( responseDTO.id() )
             .toUri();
         return ResponseEntity.created( location ).body( responseDTO );
     }
 
-    @PutMapping
+    @PutMapping( "/{card_id}" )
     public ResponseEntity<Void> updateCard(
         @PathVariable( "consumer_id" ) final Integer consumerId,
-        @Valid @RequestBody final ConsumerCardRequestDTO consumerCardDTO )
+        @PathVariable( "card_id" ) final Integer cardId,
+        @Valid @RequestBody final ConsumerCardUpdateRequestDTO consumerCardDTO )
     {
-        service.updateCard( consumerId, consumerCardDTO );
+        service.updateCard( consumerId, cardId, consumerCardDTO );
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public ResponseEntity<EntityPageableDTO<ConsumerCardRequestDTO>> findConsumersCards(
-        @PathVariable( "consumer_id" ) final Integer consumerId )
+    public ResponseEntity<EntityPageableDTO<ConsumerCardDTO>> findConsumersCards(
+        @PathVariable( "consumer_id" ) final Integer consumerId,
+        @RequestParam( name = "page", defaultValue = "0" ) final Integer page,
+        @RequestParam( name = "size", defaultValue = "10" ) final Integer size )
     {
-        return ResponseEntity.ok( service.findConsumersCards( consumerId ) );
+        final PageRequest pageable = PageRequest.of( page, size );
+        return ResponseEntity.ok( service.findConsumersCards( consumerId, pageable ) );
     }
 
     @PutMapping( "/{card_id}/credits-balances" )

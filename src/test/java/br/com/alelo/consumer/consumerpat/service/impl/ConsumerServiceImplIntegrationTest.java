@@ -1,7 +1,6 @@
 package br.com.alelo.consumer.consumerpat.service.impl;
 
 import static br.com.alelo.consumer.consumerpat.TestData.CONSUMER_ADDRESS;
-import static br.com.alelo.consumer.consumerpat.TestData.CONSUMER_CONTACT;
 import static br.com.alelo.consumer.consumerpat.TestData.CONSUMER_DTO;
 import static br.com.alelo.consumer.consumerpat.TestData.SECOND_VALID_DOCUMENT_NUMBER;
 import static br.com.alelo.consumer.consumerpat.TestData.SECOND_VALID_DOCUMENT_NUMBER_WITHOUT_MASK;
@@ -14,51 +13,33 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import org.hamcrest.core.Is;
-import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.alelo.consumer.consumerpat.dto.PageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerResponseDTO;
 import br.com.alelo.consumer.consumerpat.model.consumer.ConsumerContact;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
-import br.com.alelo.consumer.consumerpat.repository.ConsumerRepository;
 
-@ExtendWith( SpringExtension.class )
-@SpringBootTest
-@ActiveProfiles( "test" )
-@AutoConfigureMockMvc
 class ConsumerServiceImplIntegrationTest
+    extends
+        AbstractIntegrationTestConfiguration
 {
     private static final String BASE_PATH = "/v1/consumers";
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private static final ConsumerRequestDTO INVALID_CONSUMER_DTO = new ConsumerRequestDTO( null,
         null,
         null,
         null,
         null );
-
-    @Autowired
-    private MockMvc mvc;
-    @Autowired
-    private ConsumerRepository consumerRepository;
 
     @AfterEach
     void tearDown()
@@ -139,34 +120,8 @@ class ConsumerServiceImplIntegrationTest
     {
         final ResultMatcher badRequest = MockMvcResultMatchers.status().isBadRequest();
         validateErrorResponse( result, badRequest );
-        result.andExpect( MockMvcResultMatchers.jsonPath( "$.errorMessages.length()", IsEqual.equalTo( 4 ) ) );
+        result.andExpect( MockMvcResultMatchers.jsonPath( "$.errorMessages.length()", Is.is( 4 ) ) );
         assertTrue( consumerRepository.findAll().isEmpty() );
-    }
-
-    private static String writeAsJson(
-        final Object object )
-        throws JsonProcessingException
-    {
-        return OBJECT_MAPPER.writeValueAsString( object );
-    }
-
-    private static void validateErrorResponse(
-        final ResultActions result,
-        final ResultMatcher statusMatcher )
-        throws Exception
-    {
-        result.andExpect( statusMatcher )
-            .andExpect( MockMvcResultMatchers.jsonPath( "$.status", IsNull.notNullValue() ) )
-            .andExpect( MockMvcResultMatchers.jsonPath( "$.dateTime", IsNull.notNullValue() ) )
-            .andExpect( MockMvcResultMatchers.jsonPath( "$.errorMessages", IsNull.notNullValue() ) );
-    }
-
-    private static <T> T readAsObject(
-        final String json,
-        final Class<T> clazz )
-        throws JsonProcessingException
-    {
-        return OBJECT_MAPPER.readValue( json, clazz );
     }
 
     @Test
@@ -205,20 +160,6 @@ class ConsumerServiceImplIntegrationTest
             .orElseThrow();
         assertNotNull( updatedConsumer.getId() );
         assertDTOAndPersistentFields( consumerToUpdate, updatedConsumer );
-    }
-
-    private PersistentConsumer createConsumer(
-        final String name,
-        final String documentNumber )
-    {
-        final PersistentConsumer consumer = PersistentConsumer.builder()
-            .name( name )
-            .documentNumber( documentNumber )
-            .birthday( LocalDate.of( 1999, 4, 17 ) )
-            .address( CONSUMER_ADDRESS )
-            .contact( CONSUMER_CONTACT )
-            .build();
-        return consumerRepository.save( consumer );
     }
 
     @Test
@@ -260,23 +201,6 @@ class ConsumerServiceImplIntegrationTest
         createConsumer( "Will", VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
         createConsumer( "Marcella", SECOND_VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
         createConsumer( "Marcia", VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
-    }
-
-    private static void validatePageableResult(
-        final ResultActions result,
-        final PageableDTO expectedResult )
-        throws Exception
-    {
-        final String pageableFields = "$.pageable.";
-        final int numberOfElements = expectedResult.numberOfElements();
-        result.andExpect( MockMvcResultMatchers.status().isOk() )
-            .andExpect( MockMvcResultMatchers.jsonPath( pageableFields + "page", Is.is( expectedResult.page() ) ) )
-            .andExpect( MockMvcResultMatchers.jsonPath( pageableFields + "size", Is.is( expectedResult.size() ) ) )
-            .andExpect( MockMvcResultMatchers.jsonPath( pageableFields + "numberOfElements", Is.is( numberOfElements ) ) )
-            .andExpect( MockMvcResultMatchers.jsonPath( pageableFields + "totalPages", Is.is( expectedResult.totalPages() ) ) )
-            .andExpect( MockMvcResultMatchers.jsonPath( pageableFields + "totalElements",
-                Is.is( expectedResult.totalElements() ) ) )
-            .andExpect( MockMvcResultMatchers.jsonPath( "$.elements.length()", Is.is( numberOfElements ) ) );
     }
 
     @Test

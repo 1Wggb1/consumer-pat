@@ -2,13 +2,13 @@ package br.com.alelo.consumer.consumerpat.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class ConsumerNotFoundException
+public class ConsumerCardsNotFoundException
     extends
         ValidationException
 {
-    private static final String MESSAGE = "Consumer with id = %s not found";
+    private static final String MESSAGE = "Cards not found from consumer with id %d.";
 
-    public ConsumerNotFoundException(
+    public ConsumerCardsNotFoundException(
         final Integer consumerId )
     {
         super( String.format( MESSAGE, consumerId ) );

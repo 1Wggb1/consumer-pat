@@ -13,16 +13,16 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import br.com.alelo.consumer.consumerpat.dto.ErrorDTO;
-import br.com.alelo.consumer.consumerpat.exception.ConsumerValidationException;
+import br.com.alelo.consumer.consumerpat.exception.ValidationException;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @ControllerAdvice
 public class ConsumerExceptionHandler
 {
-    @ExceptionHandler( ConsumerValidationException.class )
+    @ExceptionHandler( ValidationException.class )
     public ResponseEntity<ErrorDTO> handleValidationException(
-        final ConsumerValidationException consumerValidationException )
+        final ValidationException consumerValidationException )
     {
         final String message = consumerValidationException.getMessage();
         log.warn( "Consumer Validation Exception {}", message );

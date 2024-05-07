@@ -1,22 +1,28 @@
 package br.com.alelo.consumer.consumerpat.service;
 
+import org.springframework.data.domain.Pageable;
 import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceResponseDTO;
+import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
+import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardResponseDTO;
+import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
 
 public interface ConsumerCardService
 {
-    CardDebitBalanceResponseDTO createCard(
+    ConsumerCardResponseDTO createCard(
         Integer consumerId,
         ConsumerCardRequestDTO consumerCardDTO );
 
     void updateCard(
         Integer consumerId,
-        ConsumerCardRequestDTO consumerCardDTO );
+        Integer cardId,
+        ConsumerCardUpdateRequestDTO consumerCardDTO );
 
-    EntityPageableDTO<ConsumerCardRequestDTO> findConsumersCards(
-        Integer consumerId );
+    EntityPageableDTO<ConsumerCardDTO> findConsumersCards(
+        Integer consumerId,
+        Pageable pageable );
 
     void creditCardBalance(
         Integer consumerId,
