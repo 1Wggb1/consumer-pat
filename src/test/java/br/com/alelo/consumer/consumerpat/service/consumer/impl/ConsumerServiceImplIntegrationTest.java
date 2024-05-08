@@ -164,6 +164,35 @@ class ConsumerServiceImplIntegrationTest
     }
 
     @Test
+    @DisplayName( "Deve retornar 404 quando consumidor não encontrado por id." )
+    void shouldReturn404WhenConsumerNotFoundById()
+        throws Exception
+    {
+        final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.get( BASE_PATH + "/{id}", 1000 )
+            .contentType( MediaType.APPLICATION_JSON );
+
+        final ResultActions result = mvc.perform( request );
+
+        validateErrorResponse( result, MockMvcResultMatchers.status().isNotFound() );
+    }
+
+    @Test
+    @DisplayName( "Deve retornar 200 quando consumidor encontrado por id." )
+    void shouldReturn200WhenConsumerFoundById()
+        throws Exception
+    {
+        final PersistentConsumer persistentConsumer = createConsumer( "Will", VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
+        final Integer consumerId = persistentConsumer.getId();
+        final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.get( BASE_PATH + "/{id}", consumerId )
+            .contentType( MediaType.APPLICATION_JSON );
+
+        final ResultActions result = mvc.perform( request );
+
+        result
+            .andExpect( MockMvcResultMatchers.status().isOk() );
+    }
+
+    @Test
     @DisplayName( "Deve retornar 404 quando consumidor não encontrado na atualização." )
     void shouldReturn404WhenConsumerNotFoundOUpdate()
         throws Exception

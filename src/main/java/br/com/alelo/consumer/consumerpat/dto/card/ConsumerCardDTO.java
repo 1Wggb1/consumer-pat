@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 public record ConsumerCardDTO(
     Integer id,
     Long number,
-    BigDecimal balanceValueCents,
+    BigDecimal balanceValue,
     String cardEstablishmentType )
 {
 }

@@ -39,6 +39,13 @@ public class ConsumerController
         return ResponseEntity.ok( service.findConsumers( pageable ) );
     }
 
+    @GetMapping( "/{id}" )
+    public ResponseEntity<ConsumerDTO> findConsumerById(
+        @PathVariable( "id" ) final Integer id )
+    {
+        return ResponseEntity.ok( service.findConsumerById( id ) );
+    }
+
     @PostMapping
     public ResponseEntity<ConsumerResponseDTO> createConsumer(
         @Valid @RequestBody final ConsumerRequestDTO consumerRequestDTO )

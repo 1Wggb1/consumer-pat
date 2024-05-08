@@ -13,7 +13,6 @@ import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerResponseDTO;
 import br.com.alelo.consumer.consumerpat.exception.consumer.ConsumerNotFoundException;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
-import br.com.alelo.consumer.consumerpat.repository.card.CardSpendingRepository;
 import br.com.alelo.consumer.consumerpat.repository.consumer.ConsumerRepository;
 import br.com.alelo.consumer.consumerpat.service.consumer.ConsumerService;
 import lombok.extern.log4j.Log4j2;
@@ -28,8 +27,6 @@ public class ConsumerServiceImpl
     private ConsumerRepository repository;
     @Autowired
     private ConsumerConverter converter;
-    @Autowired
-    private CardSpendingRepository cardSpendingRepository;
 
     @Override
     public ConsumerResponseDTO create(
@@ -63,16 +60,34 @@ public class ConsumerServiceImpl
     }
 
     @Override
+    public ConsumerDTO findConsumerById(
+        final Integer id )
+    {
+        final UUID traceId = UUID.randomUUID();
+        logWithTrace( traceId, String.format( "Finding consumer by id = %d", id ) );
+        final PersistentConsumer persistentConsumer = findByIdOrThrowException( id );
+        logWithTrace( traceId, String.format( "Consumer with id %d found!", id ) );
+        return converter.toDTO( persistentConsumer );
+    }
+
+    @Override
     public void update(
         final Integer id,
         final ConsumerRequestDTO consumerRequestDTO )
     {
         final UUID traceId = UUID.randomUUID();
         logWithTrace( traceId, String.format( "Updating consumer by id = %d", id ) );
-        final PersistentConsumer persistentConsumer = repository.findById( id )
-            .orElseThrow( () -> new ConsumerNotFoundException( id ) );
+        final PersistentConsumer persistentConsumer = findByIdOrThrowException( id );
         final PersistentConsumer updatedConsumer = converter.toModel( persistentConsumer, consumerRequestDTO );
         repository.save( updatedConsumer );
         logWithTrace( traceId, String.format( "Consumer with id = %d updated successfully!", id ) );
+    }
+
+    @Override
+    public PersistentConsumer findByIdOrThrowException(
+        final Integer id )
+    {
+        return repository.findById( id )
+            .orElseThrow( () -> new ConsumerNotFoundException( id ) );
     }
 }

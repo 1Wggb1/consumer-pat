@@ -19,7 +19,6 @@ import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardResponseDTO;
 import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardNotAcceptedEstablishmentException;
 import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardNotFoundException;
 import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardsNotFoundException;
-import br.com.alelo.consumer.consumerpat.exception.consumer.ConsumerNotFoundException;
 import br.com.alelo.consumer.consumerpat.model.card.CardEstablishmentType;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentCardSpending;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentConsumerCard;
@@ -27,8 +26,8 @@ import br.com.alelo.consumer.consumerpat.model.card.calculator.DebitBalanceCalcu
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
 import br.com.alelo.consumer.consumerpat.repository.card.CardSpendingRepository;
 import br.com.alelo.consumer.consumerpat.repository.card.ConsumerCardRepository;
-import br.com.alelo.consumer.consumerpat.repository.consumer.ConsumerRepository;
 import br.com.alelo.consumer.consumerpat.service.card.ConsumerCardService;
+import br.com.alelo.consumer.consumerpat.service.consumer.ConsumerService;
 import br.com.alelo.consumer.consumerpat.util.CardNumberGeneratorUtil;
 import lombok.extern.log4j.Log4j2;
 
@@ -42,7 +41,7 @@ public class ConsumerCardServiceImpl
     @Autowired
     private ConsumerCardRepository consumerCardRepository;
     @Autowired
-    private ConsumerRepository consumerRepository;
+    private ConsumerService consumerService;
     @Autowired
     private CardSpendingRepository cardSpendingRepository;
     @Autowired
@@ -57,7 +56,7 @@ public class ConsumerCardServiceImpl
         final ConsumerCardRequestDTO consumerCardDTO )
     {
         log.info( "Creating... card to consumer id = {}", consumerId );
-        final PersistentConsumer persistentConsumer = findConsumerOrThrownException( consumerId );
+        final PersistentConsumer persistentConsumer = consumerService.findByIdOrThrowException( consumerId );
         final PersistentConsumerCard savedPersistent = consumerCardRepository.save( consumerCardConverter
             .toModel( generateUniqueCardNumber(), consumerCardDTO, persistentConsumer ) );
         log.info( "Consumer with id = {} had card with id = {} created successfully",
@@ -72,13 +71,6 @@ public class ConsumerCardServiceImpl
             return generateUniqueCardNumber();
         }
         return generatedNumber;
-    }
-
-    private PersistentConsumer findConsumerOrThrownException(
-        final Integer consumerId )
-    {
-        return consumerRepository.findById( consumerId )
-            .orElseThrow( () -> new ConsumerNotFoundException( consumerId ) );
     }
 
     @Override

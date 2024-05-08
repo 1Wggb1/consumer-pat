@@ -5,6 +5,7 @@ import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerResponseDTO;
+import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
 
 public interface ConsumerService
 {
@@ -14,7 +15,13 @@ public interface ConsumerService
     EntityPageableDTO<ConsumerDTO> findConsumers(
         Pageable pageable );
 
+    ConsumerDTO findConsumerById(
+        Integer id );
+
     void update(
         Integer id,
         ConsumerRequestDTO consumerRequestDTO );
+
+    PersistentConsumer findByIdOrThrowException(
+        Integer id );
 }

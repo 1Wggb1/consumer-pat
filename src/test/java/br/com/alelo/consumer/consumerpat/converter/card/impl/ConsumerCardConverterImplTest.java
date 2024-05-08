@@ -85,7 +85,7 @@ class ConsumerCardConverterImplTest
 
         assertEquals( persistentConsumerCard.getId(), consumerCardDTO.id() );
         assertEquals( persistentConsumerCard.getNumber(), consumerCardDTO.number() );
-        assertEquals( persistentConsumerCard.getBalance(), consumerCardDTO.balanceValueCents() );
+        assertEquals( persistentConsumerCard.getBalance(), consumerCardDTO.balanceValue() );
         assertEquals( persistentConsumerCard.getEstablishmentType().name(), consumerCardDTO.cardEstablishmentType() );
     }
 

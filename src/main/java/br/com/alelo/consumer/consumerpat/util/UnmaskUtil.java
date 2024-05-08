@@ -23,10 +23,4 @@ public final class UnmaskUtil
     {
         return doUnmask( document, "[/.-]" );
     }
-
-    public static String unmaskPostalCode(
-        final String postalCode )
-    {
-        return doUnmask( postalCode, "[.-]" );
-    }
 }
