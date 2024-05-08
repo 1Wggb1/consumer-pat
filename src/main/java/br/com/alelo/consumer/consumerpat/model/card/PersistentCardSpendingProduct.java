@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class PersistentCardSpendingProduct
 {
     @Id
-    @GeneratedValue( strategy = GenerationType.AUTO )
+    @GeneratedValue( strategy = GenerationType.IDENTITY )
     private Integer id;
 
     @Column( name = "name", nullable = false )
@@ -34,4 +34,16 @@ public class PersistentCardSpendingProduct
     @ManyToOne
     @JoinColumn( name = "card_spending_id", nullable = false )
     private PersistentCardSpending cardSpending;
+
+    public PersistentCardSpendingProduct(
+        final String productName,
+        final Long quantity,
+        final Long unitaryPriceCents,
+        final PersistentCardSpending cardSpending )
+    {
+        this.productName = productName;
+        this.quantity = quantity;
+        this.unitaryPriceCents = unitaryPriceCents;
+        this.cardSpending = cardSpending;
+    }
 }

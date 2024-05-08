@@ -2,13 +2,27 @@ package br.com.alelo.consumer.consumerpat.model.card;
 
 import java.util.Arrays;
 
-import br.com.alelo.consumer.consumerpat.exception.card.CardEstablishmentTypeNotFoundException;
+import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardEstablishmentTypeNotFoundException;
+import br.com.alelo.consumer.consumerpat.model.card.calculator.DebitBalanceCalculator;
+import br.com.alelo.consumer.consumerpat.model.card.calculator.DebitBalanceDrugStoreCardCalculator;
+import br.com.alelo.consumer.consumerpat.model.card.calculator.DebitBalanceFoodCardCalculator;
+import br.com.alelo.consumer.consumerpat.model.card.calculator.DebitBalanceFuelCardCalculator;
+import lombok.Getter;
 
+@Getter
 public enum CardEstablishmentType
 {
-    FOOD,
-    DRUGSTORE,
-    FUEL;
+    DRUGSTORE( new DebitBalanceDrugStoreCardCalculator() ),
+    FOOD( new DebitBalanceFoodCardCalculator() ),
+    FUEL( new DebitBalanceFuelCardCalculator() );
+
+    private final DebitBalanceCalculator debitBalanceCalculator;
+
+    CardEstablishmentType(
+        final DebitBalanceCalculator debitBalanceCalculator )
+    {
+        this.debitBalanceCalculator = debitBalanceCalculator;
+    }
 
     public static CardEstablishmentType getOrThrownException(
         final String establishmentType )
@@ -17,6 +31,6 @@ public enum CardEstablishmentType
         return Arrays.stream( values )
             .filter( enumValue -> enumValue.name().equalsIgnoreCase( establishmentType ) )
             .findAny()
-            .orElseThrow( () -> new CardEstablishmentTypeNotFoundException( Arrays.toString( values ) ) );
+            .orElseThrow( () -> new ConsumerCardEstablishmentTypeNotFoundException( Arrays.toString( values ) ) );
     }
 }

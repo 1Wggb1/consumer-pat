@@ -31,7 +31,7 @@ import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
 import br.com.alelo.consumer.consumerpat.model.card.CardEstablishmentType;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentConsumerCard;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
-import br.com.alelo.consumer.consumerpat.repository.CardRepository;
+import br.com.alelo.consumer.consumerpat.repository.ConsumerCardRepository;
 
 class ConsumerCardServiceImplIntegrationTest
     extends
@@ -40,12 +40,12 @@ class ConsumerCardServiceImplIntegrationTest
     private static final String BASE_PATH = "/v1/consumers/{consumer_id}/cards";
 
     @Autowired
-    private CardRepository cardRepository;
+    private ConsumerCardRepository consumerCardRepository;
 
     @AfterEach
     void tearDown()
     {
-        cardRepository.deleteAll();
+        consumerCardRepository.deleteAll();
         consumerRepository.deleteAll();
     }
 
@@ -67,7 +67,7 @@ class ConsumerCardServiceImplIntegrationTest
             .andExpect( jsonPath( "$.id", IsNull.notNullValue() ) );
         final String response = result.andReturn().getResponse().getContentAsString();
         final ConsumerCardResponseDTO responseDTO = readAsObject( response, ConsumerCardResponseDTO.class );
-        final PersistentConsumerCard createdConsumerCard = cardRepository.findById( responseDTO.id() )
+        final PersistentConsumerCard createdConsumerCard = consumerCardRepository.findById( responseDTO.id() )
             .orElseThrow();
         assertNotNull( createdConsumerCard.getId() );
         assertEquals( cardRequestDTO.number(), createdConsumerCard.getNumber() );
@@ -150,7 +150,7 @@ class ConsumerCardServiceImplIntegrationTest
         final ResultActions result = mvc.perform( request );
         result
             .andExpect( MockMvcResultMatchers.status().isNoContent() );
-        final PersistentConsumerCard updatedConsumerCard = cardRepository.findById( cardId )
+        final PersistentConsumerCard updatedConsumerCard = consumerCardRepository.findById( cardId )
             .orElseThrow();
         assertNotNull( updatedConsumerCard.getId() );
         assertEquals( updateCardRequestDTO.cardEstablishmentType(), updatedConsumerCard.getEstablishmentType().name() );
@@ -170,7 +170,7 @@ class ConsumerCardServiceImplIntegrationTest
             .establishmentType( cardEstablishmentType )
             .balanceCents( 10L )
             .build();
-        return cardRepository.save( consumerCard );
+        return consumerCardRepository.save( consumerCard );
     }
 
     @Test
@@ -316,7 +316,7 @@ class ConsumerCardServiceImplIntegrationTest
         final ResultActions result = mvc.perform( request );
 
         result.andExpect( MockMvcResultMatchers.status().isNoContent() );
-        final PersistentConsumerCard rechargedCard = cardRepository.findByIdAndConsumerId( cardId, consumerId )
+        final PersistentConsumerCard rechargedCard = consumerCardRepository.findByIdAndConsumerId( cardId, consumerId )
             .orElseThrow();
         final Long expected = consumerCard.getBalanceCents() + cardCreditBalanceRequestDTO.creditCents();
         assertEquals( expected, rechargedCard.getBalanceCents() );

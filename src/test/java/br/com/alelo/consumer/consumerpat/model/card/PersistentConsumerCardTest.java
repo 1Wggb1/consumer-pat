@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.model;
+package br.com.alelo.consumer.consumerpat.model.card;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -7,8 +7,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardInvalidCreditValueException;
-import br.com.alelo.consumer.consumerpat.model.card.CardEstablishmentType;
-import br.com.alelo.consumer.consumerpat.model.card.PersistentConsumerCard;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
 
 class PersistentConsumerCardTest

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentConsumerCard;
 
 @Repository
-public interface CardRepository
+public interface ConsumerCardRepository
     extends
         JpaRepository<PersistentConsumerCard,Integer>
 {

@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 
+import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardInsufficientBalanceException;
 import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardInvalidCreditValueException;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
 import lombok.AllArgsConstructor;
@@ -29,7 +30,7 @@ import lombok.NoArgsConstructor;
 public class PersistentConsumerCard
 {
     @Id
-    @GeneratedValue( strategy = GenerationType.AUTO )
+    @GeneratedValue( strategy = GenerationType.IDENTITY )
     private Integer id;
 
     @NotNull
@@ -76,5 +77,20 @@ public class PersistentConsumerCard
     {
         validateBalance( balanceCents );
         this.balanceCents += balanceCents;
+    }
+
+    public void debit(
+        final Long debitCents )
+    {
+        validateSufficientBalance( debitCents );
+        this.balanceCents -= debitCents;
+    }
+
+    private void validateSufficientBalance(
+        final Long totalDebitCents )
+    {
+        if( balanceCents < totalDebitCents ) {
+            throw new ConsumerCardInsufficientBalanceException( balanceCents, totalDebitCents );
+        }
     }
 }

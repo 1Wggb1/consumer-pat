@@ -15,10 +15,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @Table( name = "card_spending" )
 @NoArgsConstructor
@@ -26,37 +30,43 @@ import lombok.NoArgsConstructor;
 public class PersistentCardSpending
 {
     @Id
-    @GeneratedValue( strategy = GenerationType.AUTO )
+    @GeneratedValue( strategy = GenerationType.IDENTITY )
     private Integer id;
 
+    @NotNull
     @Column( name = "establishment_name", nullable = false )
     private String establishmentName;
 
-    @Column( name = "establishment_type" )
+    @NotNull
+    @Column( name = "establishment_type", nullable = false )
     @Enumerated( EnumType.STRING )
     private CardEstablishmentType establishmentType;
 
+    @NotNull
     @Column( name = "purchase_date_time", nullable = false )
     private LocalDateTime purchaseDateTime;
 
+    @NotEmpty
     @OneToMany( mappedBy = "cardSpending", cascade = CascadeType.PERSIST )
     private List<PersistentCardSpendingProduct> products = new ArrayList<>();
 
+    @NotNull
     @ManyToOne
     @JoinColumn( name = "consumer_card_id", nullable = false )
     private PersistentConsumerCard consumerCard;
 
+    @NotNull
     @Column( name = "amount_cents", nullable = false )
     private Long amountCents;
 
     public PersistentCardSpending(
         final String establishmentName,
-        final List<PersistentCardSpendingProduct> products,
+        final CardEstablishmentType establishmentType,
         final PersistentConsumerCard consumerCard,
         final Long amountCents )
     {
         this.establishmentName = establishmentName;
-        this.products = products;
+        this.establishmentType = establishmentType;
         this.purchaseDateTime = LocalDateTime.now();
         this.consumerCard = consumerCard;
         this.amountCents = amountCents;

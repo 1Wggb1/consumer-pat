@@ -3,13 +3,13 @@ package br.com.alelo.consumer.consumerpat.exception.card;
 import org.springframework.http.HttpStatus;
 import br.com.alelo.consumer.consumerpat.exception.ValidationException;
 
-public class CardInvalidConsumerException
+public class ConsumerCardNumberAlreadyExists
     extends
         ValidationException
 {
-    private static final String MESSAGE = "Card consumer id not equals request consumer id.";
+    private static final String MESSAGE = "Card number already exists. It should be unique.";
 
-    public CardInvalidConsumerException()
+    public ConsumerCardNumberAlreadyExists()
     {
         super( MESSAGE );
     }
@@ -17,6 +17,6 @@ public class CardInvalidConsumerException
     @Override
     public HttpStatus getStatus()
     {
-        return HttpStatus.UNPROCESSABLE_ENTITY;
+        return HttpStatus.CONFLICT;
     }
 }

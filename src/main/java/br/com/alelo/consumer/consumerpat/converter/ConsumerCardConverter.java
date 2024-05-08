@@ -7,7 +7,7 @@ import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentConsumerCard;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
 
-public interface CardConverter
+public interface ConsumerCardConverter
     extends
         PageableConverter<PersistentConsumerCard,ConsumerCardDTO>
 {

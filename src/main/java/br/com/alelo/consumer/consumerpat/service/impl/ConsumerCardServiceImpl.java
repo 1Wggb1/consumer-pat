@@ -7,7 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import br.com.alelo.consumer.consumerpat.converter.CardConverter;
+import br.com.alelo.consumer.consumerpat.converter.CardSpendingConverter;
+import br.com.alelo.consumer.consumerpat.converter.ConsumerCardConverter;
 import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardCreditBalanceRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceRequestDTO;
@@ -16,15 +17,19 @@ import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardResponseDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
-import br.com.alelo.consumer.consumerpat.exception.card.CardInvalidConsumerException;
-import br.com.alelo.consumer.consumerpat.exception.card.CardNumberAlreadyExists;
+import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardInvalidConsumerException;
+import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardNotAcceptedEstablishmentException;
 import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardNotFoundException;
+import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardNumberAlreadyExists;
 import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardsNotFoundException;
 import br.com.alelo.consumer.consumerpat.exception.consumer.ConsumerNotFoundException;
+import br.com.alelo.consumer.consumerpat.model.card.CardEstablishmentType;
+import br.com.alelo.consumer.consumerpat.model.card.PersistentCardSpending;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentConsumerCard;
+import br.com.alelo.consumer.consumerpat.model.card.calculator.DebitBalanceCalculator;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
-import br.com.alelo.consumer.consumerpat.repository.CardRepository;
 import br.com.alelo.consumer.consumerpat.repository.CardSpendingRepository;
+import br.com.alelo.consumer.consumerpat.repository.ConsumerCardRepository;
 import br.com.alelo.consumer.consumerpat.repository.ConsumerRepository;
 import br.com.alelo.consumer.consumerpat.service.ConsumerCardService;
 import lombok.extern.log4j.Log4j2;
@@ -37,13 +42,15 @@ public class ConsumerCardServiceImpl
         ConsumerCardService
 {
     @Autowired
-    private CardRepository cardRepository;
+    private ConsumerCardRepository consumerCardRepository;
     @Autowired
     private ConsumerRepository consumerRepository;
     @Autowired
     private CardSpendingRepository cardSpendingRepository;
     @Autowired
-    private CardConverter cardConverter;
+    private ConsumerCardConverter consumerCardConverter;
+    @Autowired
+    private CardSpendingConverter cardSpendingConverter;
 
     @Override
     @Transactional
@@ -54,18 +61,19 @@ public class ConsumerCardServiceImpl
         log.info( "Creating... card to consumer id = {}", consumerId );
         final PersistentConsumer persistentConsumer = findConsumerOrThrownException( consumerId );
         validateIfUniqueCardNumber( consumerCardDTO.number() );
-        final PersistentConsumerCard savedPersistent = cardRepository.save( cardConverter.toModel( consumerCardDTO, persistentConsumer ) );
+        final PersistentConsumerCard savedPersistent = consumerCardRepository.save( consumerCardConverter.toModel( consumerCardDTO,
+            persistentConsumer ) );
         log.info( "Consumer with id = {} had card with id = {} created successfully",
             consumerId, savedPersistent.getId() );
-        return cardConverter.toResponseDTO( savedPersistent );
+        return consumerCardConverter.toResponseDTO( savedPersistent );
     }
 
     private void validateIfUniqueCardNumber(
         final Long cardNumber )
     {
-        final boolean existByCardNumber = cardRepository.existsByNumber( cardNumber );
+        final boolean existByCardNumber = consumerCardRepository.existsByNumber( cardNumber );
         if( existByCardNumber ) {
-            throw new CardNumberAlreadyExists();
+            throw new ConsumerCardNumberAlreadyExists();
         }
     }
 
@@ -84,14 +92,14 @@ public class ConsumerCardServiceImpl
         final ConsumerCardUpdateRequestDTO cardUpdateRequestDTO )
     {
         log.info( "Updating... card to consumer id = {}", consumerId );
-        final PersistentConsumerCard persistentConsumerCard = cardRepository.findById( cardId )
+        final PersistentConsumerCard persistentConsumerCard = consumerCardRepository.findById( cardId )
             .orElseThrow( () -> new ConsumerCardNotFoundException( cardId ) );
         validateIfUniqueCardNumber( cardUpdateRequestDTO.number() );
         final Integer cardConsumerId = persistentConsumerCard.getConsumer().getId();
         validateConsumerId( consumerId, cardConsumerId );
         log.info( "Consumer with id = {} had card with id = {} updated successfully",
             consumerId, cardId );
-        cardRepository.save( cardConverter.toModel( persistentConsumerCard, cardUpdateRequestDTO ) );
+        consumerCardRepository.save( consumerCardConverter.toModel( persistentConsumerCard, cardUpdateRequestDTO ) );
     }
 
     private static void validateConsumerId(
@@ -99,7 +107,7 @@ public class ConsumerCardServiceImpl
         final Integer cardConsumerId )
     {
         if( ! Objects.equals( consumerId, cardConsumerId ) ) {
-            throw new CardInvalidConsumerException();
+            throw new ConsumerCardInvalidConsumerException();
         }
     }
 
@@ -109,10 +117,10 @@ public class ConsumerCardServiceImpl
         final Pageable pageable )
     {
         log.info( "Finding.... cards from consumer id = {} and pageable = {}", consumerId, pageable );
-        final Page<PersistentConsumerCard> consumerCardsPage = cardRepository.findByConsumerId( consumerId, pageable );
+        final Page<PersistentConsumerCard> consumerCardsPage = consumerCardRepository.findByConsumerId( consumerId, pageable );
         validateIfCardsExists( consumerId, consumerCardsPage );
         log.info( "Cards found from consumer id = {}", consumerId );
-        return cardConverter.toPageableDTO( consumerCardsPage );
+        return consumerCardConverter.toPageableDTO( consumerCardsPage );
     }
 
     private static void validateIfCardsExists(
@@ -132,25 +140,23 @@ public class ConsumerCardServiceImpl
         final CardCreditBalanceRequestDTO creditBalanceRequestDTO )
     {
         log.info( "Adding credit value.... to consumer id = {} and card id= {}", consumerId, cardId );
-        final PersistentConsumerCard consumerCard = cardRepository
-            .findByIdAndConsumerId( cardId, consumerId )
-            .orElseThrow( () -> new ConsumerCardNotFoundException( cardId ) );
+        final PersistentConsumerCard consumerCard = findCardByIdAndConsumerIdOrThrowException( cardId, consumerId );
         final Long creditCents = creditBalanceRequestDTO.creditCents();
         consumerCard.addCredit( creditCents );
-        cardRepository.save( consumerCard );
+        consumerCardRepository.save( consumerCard );
         log.info( "Credit value = {} added successfully to consumer id = {} and card id = {}",
             creditCents, consumerId, cardId );
     }
 
-    // Criar modelo
-    // Criar enum com tipo do estabelecimento
-    // enum ter o algoritmo para calculo de taxa
-    /*
-     * Débito de valor no cartão (compra) establishmentType: tipo do
-     * estabelecimento comercial establishmentName: nome do estabelecimento
-     * comercial cardNumber: número do cartão productDescription: descrição do
-     * produto value: valor a ser debitado (subtraído)
-     */
+    private PersistentConsumerCard findCardByIdAndConsumerIdOrThrowException(
+        final Integer cardId,
+        final Integer consumerId )
+    {
+        return consumerCardRepository
+            .findByIdAndConsumerId( cardId, consumerId )
+            .orElseThrow( () -> new ConsumerCardNotFoundException( cardId ) );
+    }
+
     @Override
     @Transactional
     public CardDebitBalanceResponseDTO debitCardBalance(
@@ -158,51 +164,38 @@ public class ConsumerCardServiceImpl
         final Integer cardId,
         final CardDebitBalanceRequestDTO cardDebitBalanceRequestDTO )
     {
-        final PersistentConsumer consumer = null;
-        /*
-         * O valor só podem ser debitado do catão com o tipo correspondente ao
-         * tipo do estabelecimento da compra. Exemplo: Se a compra é em um
-         * estabelecimeto de Alimentação (food) então o valor só pode ser
-         * debitado do cartão alimentação Tipos dos estabelcimentos: 1)
-         * Alimentação (Food) 2) Farmácia (DrugStore) 3) Posto de combustivel
-         * (Fuel)
-         */
+        log.info( "Debiting... value from consumer id = {} and card id = {}", consumerId, cardId );
+        final PersistentConsumerCard consumerCard = findCardByIdAndConsumerIdOrThrowException( cardId, consumerId );
+        final CardEstablishmentType consumerCardEstablishmentType = consumerCard.getEstablishmentType();
+        validateEstablishmentType( consumerCardEstablishmentType, cardDebitBalanceRequestDTO );
 
-        if( 1 == 1 ) {
-            // Para compras no cartão de alimentação o cliente recebe um
-            // desconto de 10%
-            // final Double cashback = ( value / 100 ) * 10;
-            // value = value - cashback;
+        final DebitBalanceCalculator debitBalanceCalculator = consumerCardEstablishmentType.getDebitBalanceCalculator();
+        final Long totalDebit = debitBalanceCalculator.calculateTotal( cardDebitBalanceRequestDTO.debitValueCents() );
+        consumerCard.debit( totalDebit );
+        consumerCardRepository.save( consumerCard );
+        final PersistentCardSpending cardSpending = createCardSpending( cardDebitBalanceRequestDTO, totalDebit, consumerCard );
+        log.info( "Debit from consumer id = {} and card id = {} realized successfully!", consumerId, cardId );
+        return new CardDebitBalanceResponseDTO( cardSpending.getId() );
+    }
 
-            // consumer = repository.findByFoodCardNumber( cardNumber );
-            // consumer.setFoodCardBalance( consumer.getFoodCardBalance() -
-            // value );
-            // repository.save( consumer );
-
-        } else if( 2 == 2 ) {
-            // consumer = repository.findByDrugstoreNumber( cardNumber );
-            // consumer.setDrugstoreCardBalance(
-            // consumer.getDrugstoreCardBalance() - value );
-            // repository.save( consumer );
-
-        } else {
-            // Nas compras com o cartão de combustivel existe um acrescimo de
-            // 35%;
-            // final Double tax = ( value / 100 ) * 35;
-            // value = value + tax;
-
-            // consumer = repository.findByFuelCardNumber( cardNumber );
-            // consumer.setFuelCardBalance( consumer.getFuelCardBalance() -
-            // value );
-            // repository.save( consumer );
+    private static void validateEstablishmentType(
+        final CardEstablishmentType consumerCardEstablishmentType,
+        final CardDebitBalanceRequestDTO cardDebitBalanceRequestDTO )
+    {
+        log.info( "Validating... card and establishment type" );
+        final CardEstablishmentType debitEstablishmentType = CardEstablishmentType
+            .getOrThrownException( cardDebitBalanceRequestDTO.establishmentType() );
+        if( ! consumerCardEstablishmentType.equals( debitEstablishmentType ) ) {
+            throw new ConsumerCardNotAcceptedEstablishmentException( consumerCardEstablishmentType, debitEstablishmentType );
         }
+    }
 
-        // final PersistentCardSpending extract = new PersistentCardSpending(
-        // establishmentName,
-        // productDescription,
-        // cardNumber,
-        // value );
-        // cardSpendingRepository.save( extract );
-        return null;
+    private PersistentCardSpending createCardSpending(
+        final CardDebitBalanceRequestDTO cardDebitBalanceRequestDTO,
+        final Long totalDebit,
+        final PersistentConsumerCard consumerCard )
+    {
+        final PersistentCardSpending cardSpending = cardSpendingConverter.toModel( totalDebit, consumerCard, cardDebitBalanceRequestDTO );
+        return cardSpendingRepository.save( cardSpending );
     }
 }

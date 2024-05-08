@@ -18,12 +18,12 @@ import br.com.alelo.consumer.consumerpat.dto.PageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
-import br.com.alelo.consumer.consumerpat.exception.card.CardEstablishmentTypeNotFoundException;
+import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardEstablishmentTypeNotFoundException;
 import br.com.alelo.consumer.consumerpat.model.card.CardEstablishmentType;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentConsumerCard;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
 
-class CardConverterImplTest
+class ConsumerCardConverterImplTest
 {
     private static final PersistentConsumer DEFAULT_CONSUMER = PersistentConsumer.builder()
         .id( 1 )
@@ -31,7 +31,7 @@ class CardConverterImplTest
         .documentNumber( VALID_DOCUMENT_NUMBER_WITHOUT_MASK )
         .build();
 
-    private final CardConverterImpl subject = new CardConverterImpl();
+    private final ConsumerCardConverterImpl subject = new ConsumerCardConverterImpl();
 
     @Test
     @DisplayName( "Deve retornar persistent a partir do DTO (ConsumerCard)." )
@@ -71,7 +71,7 @@ class CardConverterImplTest
             .documentNumber( VALID_DOCUMENT_NUMBER_WITHOUT_MASK )
             .build();
 
-        assertThrows( CardEstablishmentTypeNotFoundException.class, () -> subject.toModel( cardRequestDTO, consumer ) );
+        assertThrows( ConsumerCardEstablishmentTypeNotFoundException.class, () -> subject.toModel( cardRequestDTO, consumer ) );
     }
 
     @Test
