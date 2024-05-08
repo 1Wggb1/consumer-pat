@@ -1,5 +1,6 @@
 package br.com.alelo.consumer.consumerpat.converter.card.impl;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -18,7 +19,7 @@ public class CardSpendingConverterImpl
 {
     @Override
     public PersistentCardSpending toModel(
-        final Long totalDebit,
+        final BigDecimal totalDebit,
         final PersistentConsumerCard consumerCard,
         final CardDebitBalanceRequestDTO cardDebitBalanceRequestDTO )
     {
@@ -48,7 +49,7 @@ public class CardSpendingConverterImpl
     {
         return new PersistentCardSpendingProduct( cardDebitProductDTO.productName(),
             cardDebitProductDTO.quantity(),
-            cardDebitProductDTO.unitaryPriceCents(),
+            cardDebitProductDTO.unitaryPrice(),
             persistentCardSpending );
     }
 

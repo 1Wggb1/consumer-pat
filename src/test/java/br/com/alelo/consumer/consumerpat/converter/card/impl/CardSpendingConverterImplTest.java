@@ -3,6 +3,7 @@ package br.com.alelo.consumer.consumerpat.converter.card.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +30,7 @@ class CardSpendingConverterImplTest
             .build();
         final List<CardDebitProductDTO> debitProductsDTO = List.of( createDebitProductDTO( "Maçã Gala" ), createDebitProductDTO(
             "Feijão preto" ) );
-        final long totalDebit = 1000L;
+        final BigDecimal totalDebit = BigDecimal.valueOf( 1000L );
         final CardDebitBalanceRequestDTO debitBalanceRequestDTO = new CardDebitBalanceRequestDTO( CardEstablishmentType.FOOD.name(),
             "Padaria S.A.", debitProductsDTO, totalDebit );
 
@@ -39,7 +40,7 @@ class CardSpendingConverterImplTest
         assertEquals( debitBalanceRequestDTO.establishmentType(),
             persistentCardSpending.getEstablishmentType().name() );
         assertEquals( debitBalanceRequestDTO.establishmentName(), persistentCardSpending.getEstablishmentName() );
-        assertEquals( totalDebit, persistentCardSpending.getAmountCents() );
+        assertEquals( totalDebit, persistentCardSpending.getTotalValue() );
         assertNotNull( persistentCardSpending.getPurchaseDateTime() );
         validateDebitProducts( debitProductsDTO, persistentCardSpending );
     }
@@ -47,7 +48,7 @@ class CardSpendingConverterImplTest
     private static CardDebitProductDTO createDebitProductDTO(
         final String name )
     {
-        return new CardDebitProductDTO( name, 1L, 1L );
+        return new CardDebitProductDTO( name, 1L, BigDecimal.ONE );
     }
 
     private static void validateDebitProducts(
@@ -66,7 +67,7 @@ class CardSpendingConverterImplTest
     {
         return new PersistentCardSpendingProduct( cardDebitProductDTO.productName(),
             cardDebitProductDTO.quantity(),
-            cardDebitProductDTO.unitaryPriceCents(),
+            cardDebitProductDTO.unitaryPrice(),
             persistentCardSpending );
     }
 

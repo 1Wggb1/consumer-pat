@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -26,6 +27,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import br.com.alelo.consumer.consumerpat.DebitBalanceAssertTest;
 import br.com.alelo.consumer.consumerpat.dto.PageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardCreditBalanceRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceRequestDTO;
@@ -45,8 +47,13 @@ import br.com.alelo.consumer.consumerpat.service.AbstractIntegrationTestConfigur
 class ConsumerCardServiceImplIntegrationTest
     extends
         AbstractIntegrationTestConfiguration
+    implements
+        DebitBalanceAssertTest
 {
     private static final String BASE_PATH = "/v1/consumers/{consumer_id}/cards";
+    private static final BigDecimal ONE = BigDecimal.ONE;
+    private static final BigDecimal MINUS_ONE = new BigDecimal( - 1 );
+    private static final BigDecimal ONE_THOUSAND = new BigDecimal( 1000 );
 
     @Autowired
     private ConsumerCardRepository consumerCardRepository;
@@ -83,7 +90,9 @@ class ConsumerCardServiceImplIntegrationTest
             .orElseThrow();
         assertNotNull( createdConsumerCard.getId() );
         assertEquals( cardRequestDTO.number(), createdConsumerCard.getNumber() );
-        assertEquals( Optional.ofNullable( cardRequestDTO.balanceValueCents() ).orElse( 0L ), createdConsumerCard.getBalanceCents() );
+        assertEqualsCustom( Optional.ofNullable( cardRequestDTO.balanceValue() )
+            .orElse( BigDecimal.valueOf( 0L ) ), createdConsumerCard
+                .getBalance() );
         assertEquals( cardRequestDTO.cardEstablishmentType(), createdConsumerCard.getEstablishmentType().name() );
     }
 
@@ -109,7 +118,7 @@ class ConsumerCardServiceImplIntegrationTest
         throws Exception
     {
         final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO(
-            null, - 1L, null );
+            null, MINUS_ONE, null );
         final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post( BASE_PATH, 788888 )
             .contentType( MediaType.APPLICATION_JSON )
             .content( writeAsJson( cardRequestDTO ) );
@@ -128,7 +137,7 @@ class ConsumerCardServiceImplIntegrationTest
     {
         final PersistentConsumer persistentConsumer = createConsumer( "T", VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
         final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO(
-            788545668L, 100L, "ANYY" );
+            788545668L, new BigDecimal( 100L ), "ANYY" );
         final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post( BASE_PATH, persistentConsumer.getId() )
             .contentType( MediaType.APPLICATION_JSON )
             .content( writeAsJson( cardRequestDTO ) );
@@ -167,7 +176,7 @@ class ConsumerCardServiceImplIntegrationTest
         assertNotNull( updatedConsumerCard.getId() );
         assertEquals( updateCardRequestDTO.cardEstablishmentType(), updatedConsumerCard.getEstablishmentType().name() );
         assertEquals( updateCardRequestDTO.number(), updatedConsumerCard.getNumber() );
-        assertEquals( consumerCard.getBalanceCents(), updatedConsumerCard.getBalanceCents() );
+        assertEqualsCustom( consumerCard.getBalance(), updatedConsumerCard.getBalance() );
         assertEquals( consumerCard.getConsumer(), updatedConsumerCard.getConsumer() );
     }
 
@@ -180,7 +189,7 @@ class ConsumerCardServiceImplIntegrationTest
             .number( number )
             .consumer( consumer )
             .establishmentType( cardEstablishmentType )
-            .balanceCents( 10L )
+            .balance( ONE )
             .build();
         return consumerCardRepository.save( consumerCard );
     }
@@ -272,7 +281,7 @@ class ConsumerCardServiceImplIntegrationTest
         throws Exception
     {
         final CardCreditBalanceRequestDTO cardCreditBalanceRequestDTO = new CardCreditBalanceRequestDTO(
-            10000L );
+            new BigDecimal( 10000L ) );
         final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.put(
             BASE_PATH + "/{card_Id}/credits-balances", 1, 1 )
             .contentType( MediaType.APPLICATION_JSON )
@@ -287,7 +296,7 @@ class ConsumerCardServiceImplIntegrationTest
     @MethodSource( "invalidCreditValues" )
     @DisplayName( "Deve retornar 400 quando valor para crédito é inválido (nulo ou negativo)." )
     void shouldReturn400WhenConsumerCardCreditNullOrNegative(
-        final Long value )
+        final BigDecimal value )
         throws Exception
     {
         final CardCreditBalanceRequestDTO cardCreditBalanceRequestDTO = new CardCreditBalanceRequestDTO(
@@ -302,9 +311,9 @@ class ConsumerCardServiceImplIntegrationTest
         validateErrorResponse( result, badRequest );
     }
 
-    private static Stream<Long> invalidCreditValues()
+    private static Stream<BigDecimal> invalidCreditValues()
     {
-        return Stream.of( null, - 1L );
+        return Stream.of( null, MINUS_ONE );
     }
 
     @Test
@@ -316,7 +325,7 @@ class ConsumerCardServiceImplIntegrationTest
         final PersistentConsumerCard consumerCard = createConsumerCard( 44445456L,
             CardEstablishmentType.DRUGSTORE,
             persistentConsumer );
-        final Long hundred_99 = 100_99L;
+        final BigDecimal hundred_99 = new BigDecimal( "100.99" );
         final CardCreditBalanceRequestDTO cardCreditBalanceRequestDTO = new CardCreditBalanceRequestDTO( hundred_99 );
         final Integer consumerId = persistentConsumer.getId();
         final Integer cardId = consumerCard.getId();
@@ -330,8 +339,8 @@ class ConsumerCardServiceImplIntegrationTest
         result.andExpect( MockMvcResultMatchers.status().isNoContent() );
         final PersistentConsumerCard rechargedCard = consumerCardRepository.findByIdAndConsumerId( cardId, consumerId )
             .orElseThrow();
-        final Long expected = consumerCard.getBalanceCents() + cardCreditBalanceRequestDTO.creditCents();
-        assertEquals( expected, rechargedCard.getBalanceCents() );
+        final BigDecimal expected = consumerCard.getBalance().add( cardCreditBalanceRequestDTO.creditValue() );
+        assertEquals( expected, rechargedCard.getBalance() );
     }
 
     @Test
@@ -363,8 +372,8 @@ class ConsumerCardServiceImplIntegrationTest
         final CardDebitBalanceRequestDTO debitBalanceRequestDTO = new CardDebitBalanceRequestDTO(
             CardEstablishmentType.FUEL.name(),
             "Loja do Fuel",
-            List.of( new CardDebitProductDTO( null, null, - 1L ) ),
-            100L );
+            List.of( new CardDebitProductDTO( null, null, MINUS_ONE ) ),
+            new BigDecimal( 100L ) );
         final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post( BASE_PATH + "/{card_Id}/debits-balances", 1, 1 )
             .contentType( MediaType.APPLICATION_JSON )
             .content( writeAsJson( debitBalanceRequestDTO ) );
@@ -381,11 +390,13 @@ class ConsumerCardServiceImplIntegrationTest
     void shouldReturn404WhenConsumerCardNotFoundOnDebit()
         throws Exception
     {
+        final BigDecimal unitaryPrice = BigDecimal.ONE;
         final CardDebitBalanceRequestDTO debitBalanceRequestDTO = new CardDebitBalanceRequestDTO(
             CardEstablishmentType.FOOD.name(),
             "Lojinha de doces S.A.",
-            List.of( new CardDebitProductDTO( "Bala de goma", 1L, 1L ) ),
-            1L );
+            List.of( new CardDebitProductDTO( "Bala de goma", 1L,
+                unitaryPrice ) ),
+            unitaryPrice );
         final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(
             BASE_PATH + "/{card_Id}/debits-balances", 1, 1 )
             .contentType( MediaType.APPLICATION_JSON )
@@ -406,13 +417,13 @@ class ConsumerCardServiceImplIntegrationTest
             VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
         final PersistentConsumerCard consumerCard = createConsumerCard( 44445456L,
             CardEstablishmentType.DRUGSTORE,
-            1000L,
+            ONE_THOUSAND,
             persistentConsumer );
         final CardDebitBalanceRequestDTO debitBalanceRequestDTO = new CardDebitBalanceRequestDTO(
             CardEstablishmentType.FUEL.name(),
             "Posto do Tiozão",
-            List.of( new CardDebitProductDTO( "Gasolina Comum", 1L, 1L ) ),
-            1L );
+            List.of( new CardDebitProductDTO( "Gasolina Comum", 1L, BigDecimal.ONE ) ),
+            BigDecimal.ONE );
         final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(
             BASE_PATH + "/{card_Id}/debits-balances", persistentConsumer.getId(), consumerCard.getId() )
             .contentType( MediaType.APPLICATION_JSON )
@@ -427,14 +438,14 @@ class ConsumerCardServiceImplIntegrationTest
     private PersistentConsumerCard createConsumerCard(
         final Long number,
         final CardEstablishmentType cardEstablishmentType,
-        final Long balance,
+        final BigDecimal balance,
         final PersistentConsumer consumer )
     {
         final PersistentConsumerCard consumerCard = PersistentConsumerCard.builder()
             .number( number )
             .consumer( consumer )
             .establishmentType( cardEstablishmentType )
-            .balanceCents( balance )
+            .balance( balance )
             .build();
         return consumerCardRepository.save( consumerCard );
     }
@@ -448,13 +459,13 @@ class ConsumerCardServiceImplIntegrationTest
             VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
         final PersistentConsumerCard consumerCard = createConsumerCard( 44445456L,
             CardEstablishmentType.DRUGSTORE,
-            1000L,
+            ONE_THOUSAND,
             persistentConsumer );
         final CardDebitBalanceRequestDTO debitBalanceRequestDTO = new CardDebitBalanceRequestDTO(
             CardEstablishmentType.FUEL.name(),
             "Posto do Tiozão",
-            List.of( new CardDebitProductDTO( "Gasolina Comum", 1L, 1L ) ),
-            1001L );
+            List.of( new CardDebitProductDTO( "Gasolina Comum", 1L, ONE ) ),
+            new BigDecimal( 1001L ) );
         final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(
             BASE_PATH + "/{card_Id}/debits-balances", persistentConsumer.getId(), consumerCard.getId() )
             .contentType( MediaType.APPLICATION_JSON )
@@ -475,14 +486,14 @@ class ConsumerCardServiceImplIntegrationTest
             VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
         final PersistentConsumerCard consumerCard = createConsumerCard( 44445456L,
             CardEstablishmentType.FOOD,
-            1000L,
+            ONE_THOUSAND,
             persistentConsumer );
         final CardDebitBalanceRequestDTO debitBalanceRequestDTO = new CardDebitBalanceRequestDTO(
             CardEstablishmentType.FOOD.name(),
             "Posto do Tiozão Loja de Convêniencia S.A.",
-            List.of( new CardDebitProductDTO( "Bala", 1L, 1L ),
-                new CardDebitProductDTO( "Aditivo tubox", 1L, 10L ) ),
-            100L );
+            List.of( new CardDebitProductDTO( "Bala", 1L, ONE ),
+                new CardDebitProductDTO( "Aditivo tubox", 1L, ONE.add( ONE ) ) ),
+            new BigDecimal( 100L ) );
         final Integer consumerId = persistentConsumer.getId();
         final Integer cardId = consumerCard.getId();
         final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(
@@ -501,10 +512,10 @@ class ConsumerCardServiceImplIntegrationTest
             .andExpect( jsonPath( "$.transactionId", Is.is( persistentCardSpending.getId() ) ) );
         final PersistentConsumerCard updatedConsumerCardBalance = consumerCardRepository.findByIdAndConsumerId( cardId, consumerId )
             .orElseThrow();
-        assertEquals( 910L, updatedConsumerCardBalance.getBalanceCents() );
+        assertEqualsCustom( new BigDecimal( 910 ), updatedConsumerCardBalance.getBalance() );
     }
 
-    private static void validateProducts(
+    private void validateProducts(
         final CardDebitBalanceRequestDTO debitBalanceRequestDTO,
         final PersistentCardSpending persistentCardSpending )
     {
@@ -519,7 +530,7 @@ class ConsumerCardServiceImplIntegrationTest
                 final CardDebitProductDTO expected = cardDebitProductsDTO.get( i );
                 assertEquals( expected.productName(), persistentCardSpendingProduct.getProductName() );
                 assertEquals( expected.quantity(), persistentCardSpendingProduct.getQuantity() );
-                assertEquals( expected.unitaryPriceCents(), persistentCardSpendingProduct.getUnitaryPriceCents() );
+                assertEqualsCustom( expected.unitaryPrice(), persistentCardSpendingProduct.getUnitaryPrice() );
                 assertEquals( persistentCardSpending, persistentCardSpendingProduct.getCardSpending() );
             } );
     }

@@ -1,5 +1,6 @@
 package br.com.alelo.consumer.consumerpat.model.card;
 
+import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -30,8 +31,8 @@ public class PersistentCardSpendingProduct
     @Column( name = "quantity", nullable = false )
     private Long quantity;
 
-    @Column( name = "unitary_price_cents", nullable = false )
-    private Long unitaryPriceCents;
+    @Column( name = "unitary_price", nullable = false, scale = 2 )
+    private BigDecimal unitaryPrice;
 
     @ManyToOne
     @JoinColumn( name = "card_spending_id", nullable = false )
@@ -40,12 +41,12 @@ public class PersistentCardSpendingProduct
     public PersistentCardSpendingProduct(
         final String productName,
         final Long quantity,
-        final Long unitaryPriceCents,
+        final BigDecimal unitaryPrice,
         final PersistentCardSpending cardSpending )
     {
         this.productName = productName;
         this.quantity = quantity;
-        this.unitaryPriceCents = unitaryPriceCents;
+        this.unitaryPrice = unitaryPrice;
         this.cardSpending = cardSpending;
     }
 }

@@ -1,15 +1,17 @@
 package br.com.alelo.consumer.consumerpat.model.card.calculator;
 
+import java.math.BigDecimal;
+
 public class DebitBalanceFoodCardCalculator
     implements
         DebitBalanceCalculator
 {
-    private static final Double DISCOUNT_PERCENTAGE = 0.1D;
+    private static final BigDecimal DISCOUNT_PERCENTAGE = new BigDecimal( "0.1" );
 
     @Override
-    public Long calculateDiscount(
-        final Long debitValue )
+    public BigDecimal calculateDiscount(
+        final BigDecimal debitValue )
     {
-        return (long) ( debitValue * DISCOUNT_PERCENTAGE );
+        return debitValue.multiply( DISCOUNT_PERCENTAGE );
     }
 }

@@ -1,5 +1,6 @@
 package br.com.alelo.consumer.consumerpat.model.card;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,19 +62,19 @@ public class PersistentCardSpending
     private PersistentConsumerCard consumerCard;
 
     @NotNull
-    @Column( name = "amount_cents", nullable = false )
-    private Long amountCents;
+    @Column( name = "total_value", nullable = false, scale = 2 )
+    private BigDecimal totalValue;
 
     public PersistentCardSpending(
         final String establishmentName,
         final CardEstablishmentType establishmentType,
         final PersistentConsumerCard consumerCard,
-        final Long amountCents )
+        final BigDecimal totalValue )
     {
         this.establishmentName = establishmentName;
         this.establishmentType = establishmentType;
         this.purchaseDateTime = LocalDateTime.now();
         this.consumerCard = consumerCard;
-        this.amountCents = amountCents;
+        this.totalValue = totalValue;
     }
 }

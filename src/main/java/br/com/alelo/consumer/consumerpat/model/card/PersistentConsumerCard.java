@@ -1,5 +1,6 @@
 package br.com.alelo.consumer.consumerpat.model.card;
 
+import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -38,8 +39,8 @@ public class PersistentConsumerCard
     private Long number;
 
     @PositiveOrZero
-    @Column( name = "balance_cents" )
-    private Long balanceCents;
+    @Column( name = "balance", scale = 2 )
+    private BigDecimal balance;
 
     @NotNull
     @Column( name = "establishment_type", nullable = false )
@@ -58,39 +59,39 @@ public class PersistentConsumerCard
     }
 
     public void addCredit(
-        final Long creditCents )
+        final BigDecimal credits )
     {
-        validateBalance( creditCents );
-        this.balanceCents += creditCents;
+        validateBalance( credits );
+        this.balance = balance.add( credits );
     }
 
     private void validateBalance(
-        final Long creditCents )
+        final BigDecimal credits )
     {
-        if( creditCents == null || creditCents < 0 ) {
+        if( credits == null || credits.signum() == - 1 ) {
             throw new ConsumerCardInvalidCreditValueException( id, consumer.getId() );
         }
     }
 
-    public void setBalanceCents(
-        final Long balanceCents )
+    public void setBalance(
+        final BigDecimal balance )
     {
-        validateBalance( balanceCents );
-        this.balanceCents += balanceCents;
+        validateBalance( balance );
+        this.balance = balance;
     }
 
     public void debit(
-        final Long debitCents )
+        final BigDecimal debitValue )
     {
-        validateSufficientBalance( debitCents );
-        this.balanceCents -= debitCents;
+        validateSufficientBalance( debitValue );
+        this.balance = this.balance.subtract( debitValue );
     }
 
     private void validateSufficientBalance(
-        final Long totalDebitCents )
+        final BigDecimal totalDebit )
     {
-        if( balanceCents < totalDebitCents ) {
-            throw new ConsumerCardInsufficientBalanceException( balanceCents, totalDebitCents );
+        if( balance.compareTo( totalDebit ) < 0 ) {
+            throw new ConsumerCardInsufficientBalanceException( balance, totalDebit );
         }
     }
 }

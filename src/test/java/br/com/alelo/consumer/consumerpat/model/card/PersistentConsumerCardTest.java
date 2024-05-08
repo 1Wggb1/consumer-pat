@@ -1,43 +1,44 @@
 package br.com.alelo.consumer.consumerpat.model.card;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.math.BigDecimal;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import br.com.alelo.consumer.consumerpat.DebitBalanceAssertTest;
 import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardInsufficientBalanceException;
 import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardInvalidCreditValueException;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
 
 class PersistentConsumerCardTest
+    implements
+        DebitBalanceAssertTest
 {
     @ParameterizedTest
     @MethodSource( "invalidCreditValue" )
     @DisplayName( "Deve lançar exceção quando crétido é nulo ou vazio." )
     void shouldThrowExceptionWhenCreditIsNullOrEmpty(
-        final Long invalidCreditValue )
+        final BigDecimal invalidCreditValue )
     {
         final PersistentConsumerCard consumerCard = PersistentConsumerCard.builder()
             .id( 1 )
             .number( 122255L )
-            .balanceCents( 0L )
             .establishmentType( CardEstablishmentType.FUEL )
             .consumer( PersistentConsumer.builder().id( 1 ).build() )
             .build();
 
         assertThrows( ConsumerCardInvalidCreditValueException.class, () -> consumerCard.addCredit( invalidCreditValue ) );
-        assertThrows( ConsumerCardInvalidCreditValueException.class, () -> consumerCard.setBalanceCents( invalidCreditValue ) );
+        assertThrows( ConsumerCardInvalidCreditValueException.class, () -> consumerCard.setBalance( invalidCreditValue ) );
     }
 
-    private static Stream<Long> invalidCreditValue()
+    private static Stream<BigDecimal> invalidCreditValue()
     {
-        return Stream.of( null, - 15L );
+        return Stream.of( null, new BigDecimal( - 1 ) );
     }
 
     @Test
@@ -47,32 +48,36 @@ class PersistentConsumerCardTest
         final PersistentConsumerCard consumerCard = PersistentConsumerCard.builder()
             .id( 1 )
             .number( 122255L )
-            .balanceCents( 10L )
+            .balance( BigDecimal.valueOf( 10L ) )
             .establishmentType( CardEstablishmentType.FUEL )
             .consumer( PersistentConsumer.builder().id( 1 ).build() )
             .build();
 
-        assertThrows( ConsumerCardInsufficientBalanceException.class, () -> consumerCard.debit( 11L ) );
+        assertThrows( ConsumerCardInsufficientBalanceException.class, () -> consumerCard.debit( BigDecimal.valueOf( 11L ) ) );
     }
 
     @ParameterizedTest
-    @ValueSource( longs = {
-        9, 10, 1
-    } )
+    @MethodSource( "validValues" )
     @DisplayName( "Deve lançar exceção quando débito maior que saldo." )
     void shouldNotThrownExceptionWhenDebitLessThanEqualsBalance(
-        final Long debitValue )
+        final BigDecimal debitValue )
     {
         final PersistentConsumerCard consumerCard = PersistentConsumerCard.builder()
             .id( 1 )
             .number( 122255L )
-            .balanceCents( 10L )
+            .balance( new BigDecimal( 10L ) )
             .establishmentType( CardEstablishmentType.FUEL )
             .consumer( PersistentConsumer.builder().id( 1 ).build() )
             .build();
-        final Long balanceCentsBeforeDebit = consumerCard.getBalanceCents();
+
+        final BigDecimal balanceBeforeDebit = consumerCard.getBalance();
 
         assertDoesNotThrow( () -> consumerCard.debit( debitValue ) );
-        assertEquals( balanceCentsBeforeDebit - debitValue, consumerCard.getBalanceCents() );
+        assertEqualsCustom( balanceBeforeDebit.subtract( debitValue ), consumerCard.getBalance() );
+    }
+
+    private static Stream<BigDecimal> validValues()
+    {
+        return Stream.of( new BigDecimal( 9 ), new BigDecimal( 10 ), BigDecimal.ONE );
     }
 }

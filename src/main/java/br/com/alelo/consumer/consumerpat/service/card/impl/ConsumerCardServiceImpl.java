@@ -1,5 +1,6 @@
 package br.com.alelo.consumer.consumerpat.service.card.impl;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,11 +142,11 @@ public class ConsumerCardServiceImpl
     {
         log.info( "Adding credit value.... to consumer id = {} and card id= {}", consumerId, cardId );
         final PersistentConsumerCard consumerCard = findCardByIdAndConsumerIdOrThrowException( cardId, consumerId );
-        final Long creditCents = creditBalanceRequestDTO.creditCents();
-        consumerCard.addCredit( creditCents );
+        final BigDecimal creditValue = creditBalanceRequestDTO.creditValue();
+        consumerCard.addCredit( creditValue );
         consumerCardRepository.save( consumerCard );
         log.info( "Credit value = {} added successfully to consumer id = {} and card id = {}",
-            creditCents, consumerId, cardId );
+            creditValue, consumerId, cardId );
     }
 
     private PersistentConsumerCard findCardByIdAndConsumerIdOrThrowException(
@@ -170,7 +171,7 @@ public class ConsumerCardServiceImpl
         validateEstablishmentType( consumerCardEstablishmentType, cardDebitBalanceRequestDTO );
 
         final DebitBalanceCalculator debitBalanceCalculator = consumerCardEstablishmentType.getDebitBalanceCalculator();
-        final Long totalDebit = debitBalanceCalculator.calculateTotal( cardDebitBalanceRequestDTO.debitValueCents() );
+        final BigDecimal totalDebit = debitBalanceCalculator.calculateTotal( cardDebitBalanceRequestDTO.debitValue() );
         consumerCard.debit( totalDebit );
         consumerCardRepository.save( consumerCard );
 
@@ -192,7 +193,7 @@ public class ConsumerCardServiceImpl
 
     private CardDebitBalanceResponseDTO createCardSpending(
         final CardDebitBalanceRequestDTO cardDebitBalanceRequestDTO,
-        final Long totalDebit,
+        final BigDecimal totalDebit,
         final PersistentConsumerCard consumerCard )
     {
         final PersistentCardSpending cardSpending = cardSpendingConverter.toModel( totalDebit, consumerCard, cardDebitBalanceRequestDTO );

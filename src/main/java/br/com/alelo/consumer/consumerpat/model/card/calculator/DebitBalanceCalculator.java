@@ -1,22 +1,25 @@
 package br.com.alelo.consumer.consumerpat.model.card.calculator;
 
+import java.math.BigDecimal;
+
 public interface DebitBalanceCalculator
 {
-    default Long calculateDiscount(
-        final Long debitValue )
+    default BigDecimal calculateDiscount(
+        final BigDecimal debitValue )
     {
-        return 0L;
+        return BigDecimal.ZERO;
     }
 
-    default Long calculateTax(
-        final Long debitValue )
+    default BigDecimal calculateTax(
+        final BigDecimal debitValue )
     {
-        return 0L;
+        return BigDecimal.ZERO;
     }
 
-    default Long calculateTotal(
-        final Long debitValue )
+    default BigDecimal calculateTotal(
+        final BigDecimal debitValue )
     {
-        return debitValue - calculateDiscount( debitValue ) + calculateTax( debitValue );
+        final BigDecimal discount = debitValue.subtract( calculateDiscount( debitValue ) );
+        return discount.add( calculateTax( debitValue ) );
     }
 }

@@ -4,6 +4,7 @@ import static br.com.alelo.consumer.consumerpat.TestData.VALID_DOCUMENT_NUMBER_W
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -38,7 +39,7 @@ class ConsumerCardConverterImplTest
     void shouldReturnPersistentFromDTO()
     {
         final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO( 55555L,
-            1000L,
+            BigDecimal.valueOf( 1000L ),
             CardEstablishmentType.FUEL.name() );
         final PersistentConsumer consumer = PersistentConsumer.builder()
             .id( 1 )
@@ -48,7 +49,7 @@ class ConsumerCardConverterImplTest
 
         final PersistentConsumerCard persistentConsumerCard = subject.toModel( cardRequestDTO, consumer );
 
-        assertEquals( cardRequestDTO.balanceValueCents(), persistentConsumerCard.getBalanceCents() );
+        assertEquals( cardRequestDTO.balanceValue(), persistentConsumerCard.getBalance() );
         assertEquals( cardRequestDTO.cardEstablishmentType(), persistentConsumerCard.getEstablishmentType().name() );
         assertEquals( cardRequestDTO.number(), persistentConsumerCard.getNumber() );
         assertEquals( persistentConsumerCard.getConsumer(), consumer );
@@ -63,7 +64,7 @@ class ConsumerCardConverterImplTest
         final String cardEstablishmentType )
     {
         final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO( 55555L,
-            1000L,
+            BigDecimal.valueOf( 1000L ),
             cardEstablishmentType );
         final PersistentConsumer consumer = PersistentConsumer.builder()
             .id( 1 )
@@ -82,7 +83,7 @@ class ConsumerCardConverterImplTest
             .id( 1 )
             .establishmentType( CardEstablishmentType.DRUGSTORE )
             .consumer( DEFAULT_CONSUMER )
-            .balanceCents( 1000L )
+            .balance( BigDecimal.valueOf( 1000L ) )
             .number( 154785966555L )
             .build();
         final ConsumerCardUpdateRequestDTO cardUpdateRequestDTO = new ConsumerCardUpdateRequestDTO( 78855788L, CardEstablishmentType.FUEL
@@ -91,7 +92,7 @@ class ConsumerCardConverterImplTest
         final PersistentConsumerCard persistentConsumerCard = subject.toModel( consumerCard, cardUpdateRequestDTO );
 
         assertEquals( consumerCard.getId(), persistentConsumerCard.getId() );
-        assertEquals( consumerCard.getBalanceCents(), persistentConsumerCard.getBalanceCents() );
+        assertEquals( consumerCard.getBalance(), persistentConsumerCard.getBalance() );
         assertEquals( cardUpdateRequestDTO.number(), persistentConsumerCard.getNumber() );
         assertEquals( cardUpdateRequestDTO.cardEstablishmentType(), persistentConsumerCard.getEstablishmentType().name() );
     }
@@ -107,7 +108,7 @@ class ConsumerCardConverterImplTest
 
         assertEquals( persistentConsumerCard.getId(), consumerCardDTO.id() );
         assertEquals( persistentConsumerCard.getNumber(), consumerCardDTO.number() );
-        assertEquals( persistentConsumerCard.getBalanceCents(), consumerCardDTO.balanceValueCents() );
+        assertEquals( persistentConsumerCard.getBalance(), consumerCardDTO.balanceValueCents() );
         assertEquals( persistentConsumerCard.getEstablishmentType().name(), consumerCardDTO.cardEstablishmentType() );
     }
 
@@ -119,7 +120,7 @@ class ConsumerCardConverterImplTest
             .id( id )
             .establishmentType( establishmentType )
             .consumer( DEFAULT_CONSUMER )
-            .balanceCents( 1000L )
+            .balance( BigDecimal.valueOf( 1000L ) )
             .number( 154785966555L );
     }
 
