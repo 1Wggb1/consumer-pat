@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.converter.impl;
+package br.com.alelo.consumer.consumerpat.converter.card.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

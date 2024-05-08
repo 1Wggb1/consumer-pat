@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.converter;
+package br.com.alelo.consumer.consumerpat.converter.card;
 
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceResponseDTO;

@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.controller;
+package br.com.alelo.consumer.consumerpat.controller.card;
 
 import java.net.URI;
 import javax.validation.Valid;
@@ -23,7 +23,7 @@ import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardResponseDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
-import br.com.alelo.consumer.consumerpat.service.ConsumerCardService;
+import br.com.alelo.consumer.consumerpat.service.card.ConsumerCardService;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2

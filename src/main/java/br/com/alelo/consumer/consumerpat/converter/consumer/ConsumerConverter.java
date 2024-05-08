@@ -1,5 +1,6 @@
-package br.com.alelo.consumer.consumerpat.converter;
+package br.com.alelo.consumer.consumerpat.converter.consumer;
 
+import br.com.alelo.consumer.consumerpat.converter.PageableConverter;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;

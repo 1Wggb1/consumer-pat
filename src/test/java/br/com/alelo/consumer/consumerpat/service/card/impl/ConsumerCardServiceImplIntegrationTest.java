@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.service.impl;
+package br.com.alelo.consumer.consumerpat.service.card.impl;
 
 import static br.com.alelo.consumer.consumerpat.TestData.SECOND_VALID_DOCUMENT_NUMBER_WITHOUT_MASK;
 import static br.com.alelo.consumer.consumerpat.TestData.VALID_DOCUMENT_NUMBER_WITHOUT_MASK;
@@ -38,8 +38,9 @@ import br.com.alelo.consumer.consumerpat.model.card.PersistentCardSpending;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentCardSpendingProduct;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentConsumerCard;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
-import br.com.alelo.consumer.consumerpat.repository.CardSpendingRepository;
-import br.com.alelo.consumer.consumerpat.repository.ConsumerCardRepository;
+import br.com.alelo.consumer.consumerpat.repository.card.CardSpendingRepository;
+import br.com.alelo.consumer.consumerpat.repository.card.ConsumerCardRepository;
+import br.com.alelo.consumer.consumerpat.service.AbstractIntegrationTestConfiguration;
 
 class ConsumerCardServiceImplIntegrationTest
     extends

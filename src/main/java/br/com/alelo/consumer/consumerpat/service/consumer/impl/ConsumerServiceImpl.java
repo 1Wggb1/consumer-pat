@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.service.impl;
+package br.com.alelo.consumer.consumerpat.service.consumer.impl;
 
 import java.util.UUID;
 
@@ -6,16 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import br.com.alelo.consumer.consumerpat.converter.ConsumerConverter;
+import br.com.alelo.consumer.consumerpat.converter.consumer.ConsumerConverter;
 import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerResponseDTO;
 import br.com.alelo.consumer.consumerpat.exception.consumer.ConsumerNotFoundException;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
-import br.com.alelo.consumer.consumerpat.repository.CardSpendingRepository;
-import br.com.alelo.consumer.consumerpat.repository.ConsumerRepository;
-import br.com.alelo.consumer.consumerpat.service.ConsumerService;
+import br.com.alelo.consumer.consumerpat.repository.card.CardSpendingRepository;
+import br.com.alelo.consumer.consumerpat.repository.consumer.ConsumerRepository;
+import br.com.alelo.consumer.consumerpat.service.consumer.ConsumerService;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2

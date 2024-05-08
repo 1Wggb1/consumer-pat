@@ -1,5 +1,6 @@
-package br.com.alelo.consumer.consumerpat.converter;
+package br.com.alelo.consumer.consumerpat.converter.card;
 
+import br.com.alelo.consumer.consumerpat.converter.PageableConverter;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardResponseDTO;

@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.controller;
+package br.com.alelo.consumer.consumerpat.controller.consumer;
 
 import java.net.URI;
 import javax.validation.Valid;
@@ -19,7 +19,7 @@ import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerResponseDTO;
-import br.com.alelo.consumer.consumerpat.service.ConsumerService;
+import br.com.alelo.consumer.consumerpat.service.consumer.ConsumerService;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2

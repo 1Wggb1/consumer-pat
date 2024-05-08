@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.converter.impl;
+package br.com.alelo.consumer.consumerpat.converter.card.impl;
 
 import static br.com.alelo.consumer.consumerpat.TestData.VALID_DOCUMENT_NUMBER_WITHOUT_MASK;
 import static org.junit.jupiter.api.Assertions.assertEquals;

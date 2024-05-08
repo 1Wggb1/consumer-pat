@@ -1,10 +1,10 @@
-package br.com.alelo.consumer.consumerpat.converter.impl;
+package br.com.alelo.consumer.consumerpat.converter.consumer.impl;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import org.springframework.stereotype.Component;
-import br.com.alelo.consumer.consumerpat.converter.ConsumerConverter;
+import br.com.alelo.consumer.consumerpat.converter.consumer.ConsumerConverter;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;

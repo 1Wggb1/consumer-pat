@@ -1,9 +1,9 @@
-package br.com.alelo.consumer.consumerpat.converter.impl;
+package br.com.alelo.consumer.consumerpat.converter.card.impl;
 
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
-import br.com.alelo.consumer.consumerpat.converter.ConsumerCardConverter;
+import br.com.alelo.consumer.consumerpat.converter.card.ConsumerCardConverter;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardResponseDTO;

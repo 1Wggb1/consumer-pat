@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.repository;
+package br.com.alelo.consumer.consumerpat.repository.card;
 
 import java.util.Optional;
 

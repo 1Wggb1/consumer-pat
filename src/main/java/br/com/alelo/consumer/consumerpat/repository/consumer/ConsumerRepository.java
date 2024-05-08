@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.repository;
+package br.com.alelo.consumer.consumerpat.repository.consumer;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

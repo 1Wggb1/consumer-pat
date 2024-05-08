@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.converter.impl;
+package br.com.alelo.consumer.consumerpat.converter.consumer.impl;
 
 import static br.com.alelo.consumer.consumerpat.TestData.CONSUMER_ADDRESS;
 import static br.com.alelo.consumer.consumerpat.TestData.CONSUMER_CONTACT;

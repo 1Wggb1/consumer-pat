@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.service;
+package br.com.alelo.consumer.consumerpat.service.card;
 
 import org.springframework.data.domain.Pageable;
 import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;

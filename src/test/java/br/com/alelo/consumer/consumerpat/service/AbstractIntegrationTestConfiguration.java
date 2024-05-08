@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.service.impl;
+package br.com.alelo.consumer.consumerpat.service;
 
 import static br.com.alelo.consumer.consumerpat.TestData.CONSUMER_ADDRESS;
 import static br.com.alelo.consumer.consumerpat.TestData.CONSUMER_CONTACT;
@@ -21,13 +21,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.alelo.consumer.consumerpat.dto.PageableDTO;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
-import br.com.alelo.consumer.consumerpat.repository.ConsumerRepository;
+import br.com.alelo.consumer.consumerpat.repository.consumer.ConsumerRepository;
 
 @ExtendWith( SpringExtension.class )
 @SpringBootTest
 @ActiveProfiles( "test" )
 @AutoConfigureMockMvc
-abstract class AbstractIntegrationTestConfiguration
+public abstract class AbstractIntegrationTestConfiguration
 {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 

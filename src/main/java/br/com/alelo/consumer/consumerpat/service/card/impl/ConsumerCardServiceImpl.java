@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.service.impl;
+package br.com.alelo.consumer.consumerpat.service.card.impl;
 
 import java.util.Objects;
 
@@ -7,8 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import br.com.alelo.consumer.consumerpat.converter.CardSpendingConverter;
-import br.com.alelo.consumer.consumerpat.converter.ConsumerCardConverter;
+import br.com.alelo.consumer.consumerpat.converter.card.CardSpendingConverter;
+import br.com.alelo.consumer.consumerpat.converter.card.ConsumerCardConverter;
 import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardCreditBalanceRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceRequestDTO;
@@ -28,10 +28,10 @@ import br.com.alelo.consumer.consumerpat.model.card.PersistentCardSpending;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentConsumerCard;
 import br.com.alelo.consumer.consumerpat.model.card.calculator.DebitBalanceCalculator;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
-import br.com.alelo.consumer.consumerpat.repository.CardSpendingRepository;
-import br.com.alelo.consumer.consumerpat.repository.ConsumerCardRepository;
-import br.com.alelo.consumer.consumerpat.repository.ConsumerRepository;
-import br.com.alelo.consumer.consumerpat.service.ConsumerCardService;
+import br.com.alelo.consumer.consumerpat.repository.card.CardSpendingRepository;
+import br.com.alelo.consumer.consumerpat.repository.card.ConsumerCardRepository;
+import br.com.alelo.consumer.consumerpat.repository.consumer.ConsumerRepository;
+import br.com.alelo.consumer.consumerpat.service.card.ConsumerCardService;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2

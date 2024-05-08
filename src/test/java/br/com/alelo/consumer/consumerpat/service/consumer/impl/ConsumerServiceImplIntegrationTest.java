@@ -1,4 +1,4 @@
-package br.com.alelo.consumer.consumerpat.service.impl;
+package br.com.alelo.consumer.consumerpat.service.consumer.impl;
 
 import static br.com.alelo.consumer.consumerpat.TestData.CONSUMER_ADDRESS;
 import static br.com.alelo.consumer.consumerpat.TestData.CONSUMER_DTO;
@@ -28,6 +28,7 @@ import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.consumer.ConsumerResponseDTO;
 import br.com.alelo.consumer.consumerpat.model.consumer.ConsumerContact;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
+import br.com.alelo.consumer.consumerpat.service.AbstractIntegrationTestConfiguration;
 
 class ConsumerServiceImplIntegrationTest
     extends
