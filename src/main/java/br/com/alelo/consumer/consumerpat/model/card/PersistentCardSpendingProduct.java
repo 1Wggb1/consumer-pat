@@ -10,8 +10,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @Table( name = "card_product_spending" )
 @NoArgsConstructor

@@ -173,9 +173,9 @@ public class ConsumerCardServiceImpl
         final Long totalDebit = debitBalanceCalculator.calculateTotal( cardDebitBalanceRequestDTO.debitValueCents() );
         consumerCard.debit( totalDebit );
         consumerCardRepository.save( consumerCard );
-        final PersistentCardSpending cardSpending = createCardSpending( cardDebitBalanceRequestDTO, totalDebit, consumerCard );
+
         log.info( "Debit from consumer id = {} and card id = {} realized successfully!", consumerId, cardId );
-        return new CardDebitBalanceResponseDTO( cardSpending.getId() );
+        return createCardSpending( cardDebitBalanceRequestDTO, totalDebit, consumerCard );
     }
 
     private static void validateEstablishmentType(
@@ -190,12 +190,12 @@ public class ConsumerCardServiceImpl
         }
     }
 
-    private PersistentCardSpending createCardSpending(
+    private CardDebitBalanceResponseDTO createCardSpending(
         final CardDebitBalanceRequestDTO cardDebitBalanceRequestDTO,
         final Long totalDebit,
         final PersistentConsumerCard consumerCard )
     {
         final PersistentCardSpending cardSpending = cardSpendingConverter.toModel( totalDebit, consumerCard, cardDebitBalanceRequestDTO );
-        return cardSpendingRepository.save( cardSpending );
+        return cardSpendingConverter.toDTO( cardSpendingRepository.save( cardSpending ) );
     }
 }

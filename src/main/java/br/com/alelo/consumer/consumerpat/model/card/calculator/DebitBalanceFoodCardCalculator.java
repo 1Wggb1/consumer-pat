@@ -8,8 +8,8 @@ public class DebitBalanceFoodCardCalculator
 
     @Override
     public Long calculateDiscount(
-        final Long value )
+        final Long debitValue )
     {
-        return (long) ( value * DISCOUNT_PERCENTAGE );
+        return (long) ( debitValue * DISCOUNT_PERCENTAGE );
     }
 }

@@ -8,8 +8,8 @@ public class DebitBalanceFuelCardCalculator
 
     @Override
     public Long calculateTax(
-        final Long value )
+        final Long debitValue )
     {
-        return (long) ( value * TAX_PERCENTAGE );
+        return (long) ( debitValue * TAX_PERCENTAGE );
     }
 }

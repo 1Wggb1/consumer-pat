@@ -4,9 +4,12 @@ import static br.com.alelo.consumer.consumerpat.TestData.SECOND_VALID_DOCUMENT_N
 import static br.com.alelo.consumer.consumerpat.TestData.VALID_DOCUMENT_NUMBER_WITHOUT_MASK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.hamcrest.core.Is;
@@ -25,12 +28,17 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import br.com.alelo.consumer.consumerpat.dto.PageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardCreditBalanceRequestDTO;
+import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceRequestDTO;
+import br.com.alelo.consumer.consumerpat.dto.card.CardDebitProductDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardResponseDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
 import br.com.alelo.consumer.consumerpat.model.card.CardEstablishmentType;
+import br.com.alelo.consumer.consumerpat.model.card.PersistentCardSpending;
+import br.com.alelo.consumer.consumerpat.model.card.PersistentCardSpendingProduct;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentConsumerCard;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
+import br.com.alelo.consumer.consumerpat.repository.CardSpendingRepository;
 import br.com.alelo.consumer.consumerpat.repository.ConsumerCardRepository;
 
 class ConsumerCardServiceImplIntegrationTest
@@ -41,10 +49,13 @@ class ConsumerCardServiceImplIntegrationTest
 
     @Autowired
     private ConsumerCardRepository consumerCardRepository;
+    @Autowired
+    private CardSpendingRepository cardSpendingRepository;
 
     @AfterEach
     void tearDown()
     {
+        cardSpendingRepository.deleteAll();
         consumerCardRepository.deleteAll();
         consumerRepository.deleteAll();
     }
@@ -320,5 +331,195 @@ class ConsumerCardServiceImplIntegrationTest
             .orElseThrow();
         final Long expected = consumerCard.getBalanceCents() + cardCreditBalanceRequestDTO.creditCents();
         assertEquals( expected, rechargedCard.getBalanceCents() );
+    }
+
+    @Test
+    @DisplayName( "Deve retornar 400 quando payload inválido no débito do cartão." )
+    void shouldReturn400WhenCardDebitPayloadInvalid()
+        throws Exception
+    {
+        final CardDebitBalanceRequestDTO debitBalanceRequestDTO = new CardDebitBalanceRequestDTO(
+            null,
+            null,
+            null,
+            null );
+        final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post( BASE_PATH + "/{card_Id}/debits-balances", 1, 1 )
+            .contentType( MediaType.APPLICATION_JSON )
+            .content( writeAsJson( debitBalanceRequestDTO ) );
+
+        final ResultActions result = mvc.perform( request );
+
+        result.andExpect( jsonPath( "$.errorMessages.length()", Is.is( 4 ) ) );
+        final ResultMatcher badRequest = MockMvcResultMatchers.status().isBadRequest();
+        validateErrorResponse( result, badRequest );
+    }
+
+    @Test
+    @DisplayName( "Deve retornar 400 quando products inválidos no payload no débito do cartão." )
+    void shouldReturn400WhenCardDebitProductsPayloadInvalid()
+        throws Exception
+    {
+        final CardDebitBalanceRequestDTO debitBalanceRequestDTO = new CardDebitBalanceRequestDTO(
+            CardEstablishmentType.FUEL.name(),
+            "Loja do Fuel",
+            List.of( new CardDebitProductDTO( null, null, - 1L ) ),
+            100L );
+        final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post( BASE_PATH + "/{card_Id}/debits-balances", 1, 1 )
+            .contentType( MediaType.APPLICATION_JSON )
+            .content( writeAsJson( debitBalanceRequestDTO ) );
+
+        final ResultActions result = mvc.perform( request );
+
+        result.andExpect( jsonPath( "$.errorMessages.length()", Is.is( 3 ) ) );
+        final ResultMatcher badRequest = MockMvcResultMatchers.status().isBadRequest();
+        validateErrorResponse( result, badRequest );
+    }
+
+    @Test
+    @DisplayName( "Deve retornar 404 quando consumidor não encontrado no débito." )
+    void shouldReturn404WhenConsumerCardNotFoundOnDebit()
+        throws Exception
+    {
+        final CardDebitBalanceRequestDTO debitBalanceRequestDTO = new CardDebitBalanceRequestDTO(
+            CardEstablishmentType.FOOD.name(),
+            "Lojinha de doces S.A.",
+            List.of( new CardDebitProductDTO( "Bala de goma", 1L, 1L ) ),
+            1L );
+        final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(
+            BASE_PATH + "/{card_Id}/debits-balances", 1, 1 )
+            .contentType( MediaType.APPLICATION_JSON )
+            .content( writeAsJson( debitBalanceRequestDTO ) );
+
+        final ResultActions result = mvc.perform( request );
+
+        validateErrorResponse( result, MockMvcResultMatchers.status().isNotFound() );
+        assertTrue( cardSpendingRepository.findAll().isEmpty() );
+    }
+
+    @Test
+    @DisplayName( "Deve retornar 422 quando tipo de estabelecimento diferente do tipo do esbelecimento aceito pelo cartão." )
+    void shouldReturn422WhenEstablishmentTypeDifferentFromCard()
+        throws Exception
+    {
+        final PersistentConsumer persistentConsumer = createConsumer( "Will",
+            VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
+        final PersistentConsumerCard consumerCard = createConsumerCard( 44445456L,
+            CardEstablishmentType.DRUGSTORE,
+            1000L,
+            persistentConsumer );
+        final CardDebitBalanceRequestDTO debitBalanceRequestDTO = new CardDebitBalanceRequestDTO(
+            CardEstablishmentType.FUEL.name(),
+            "Posto do Tiozão",
+            List.of( new CardDebitProductDTO( "Gasolina Comum", 1L, 1L ) ),
+            1L );
+        final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(
+            BASE_PATH + "/{card_Id}/debits-balances", persistentConsumer.getId(), consumerCard.getId() )
+            .contentType( MediaType.APPLICATION_JSON )
+            .content( writeAsJson( debitBalanceRequestDTO ) );
+
+        final ResultActions result = mvc.perform( request );
+
+        validateErrorResponse( result, MockMvcResultMatchers.status().isUnprocessableEntity() );
+        assertTrue( cardSpendingRepository.findAll().isEmpty() );
+    }
+
+    private PersistentConsumerCard createConsumerCard(
+        final Long number,
+        final CardEstablishmentType cardEstablishmentType,
+        final Long balance,
+        final PersistentConsumer consumer )
+    {
+        final PersistentConsumerCard consumerCard = PersistentConsumerCard.builder()
+            .number( number )
+            .consumer( consumer )
+            .establishmentType( cardEstablishmentType )
+            .balanceCents( balance )
+            .build();
+        return consumerCardRepository.save( consumerCard );
+    }
+
+    @Test
+    @DisplayName( "Deve retornar 422 quando crédito no cartão é menor que débito da compra." )
+    void shouldReturn422WhenCardCreditLessThanDebitValue()
+        throws Exception
+    {
+        final PersistentConsumer persistentConsumer = createConsumer( "Will",
+            VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
+        final PersistentConsumerCard consumerCard = createConsumerCard( 44445456L,
+            CardEstablishmentType.DRUGSTORE,
+            1000L,
+            persistentConsumer );
+        final CardDebitBalanceRequestDTO debitBalanceRequestDTO = new CardDebitBalanceRequestDTO(
+            CardEstablishmentType.FUEL.name(),
+            "Posto do Tiozão",
+            List.of( new CardDebitProductDTO( "Gasolina Comum", 1L, 1L ) ),
+            1001L );
+        final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(
+            BASE_PATH + "/{card_Id}/debits-balances", persistentConsumer.getId(), consumerCard.getId() )
+            .contentType( MediaType.APPLICATION_JSON )
+            .content( writeAsJson( debitBalanceRequestDTO ) );
+
+        final ResultActions result = mvc.perform( request );
+
+        validateErrorResponse( result, MockMvcResultMatchers.status().isUnprocessableEntity() );
+        assertTrue( cardSpendingRepository.findAll().isEmpty() );
+    }
+
+    @Test
+    @DisplayName( "Deve retornar 200 débito executado com sucesso." )
+    void shouldReturn200WhenCardDebitExecutedSuccessfully()
+        throws Exception
+    {
+        final PersistentConsumer persistentConsumer = createConsumer( "Will",
+            VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
+        final PersistentConsumerCard consumerCard = createConsumerCard( 44445456L,
+            CardEstablishmentType.FOOD,
+            1000L,
+            persistentConsumer );
+        final CardDebitBalanceRequestDTO debitBalanceRequestDTO = new CardDebitBalanceRequestDTO(
+            CardEstablishmentType.FOOD.name(),
+            "Posto do Tiozão Loja de Convêniencia S.A.",
+            List.of( new CardDebitProductDTO( "Bala", 1L, 1L ),
+                new CardDebitProductDTO( "Aditivo tubox", 1L, 10L ) ),
+            100L );
+        final Integer consumerId = persistentConsumer.getId();
+        final Integer cardId = consumerCard.getId();
+        final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(
+            BASE_PATH + "/{card_Id}/debits-balances", consumerId, cardId )
+            .contentType( MediaType.APPLICATION_JSON )
+            .content( writeAsJson( debitBalanceRequestDTO ) );
+
+        final ResultActions result = mvc.perform( request );
+
+        final ResultActions resultActions = result.andExpect( MockMvcResultMatchers.status().isOk() );
+        final List<PersistentCardSpending> cardSpendings = cardSpendingRepository.findAll();
+        assertEquals( 1, cardSpendings.size() );
+        final PersistentCardSpending persistentCardSpending = cardSpendings.get( 0 );
+        validateProducts( debitBalanceRequestDTO, persistentCardSpending );
+        resultActions
+            .andExpect( jsonPath( "$.transactionId", Is.is( persistentCardSpending.getId() ) ) );
+        final PersistentConsumerCard updatedConsumerCardBalance = consumerCardRepository.findByIdAndConsumerId( cardId, consumerId )
+            .orElseThrow();
+        assertEquals( 910L, updatedConsumerCardBalance.getBalanceCents() );
+    }
+
+    private static void validateProducts(
+        final CardDebitBalanceRequestDTO debitBalanceRequestDTO,
+        final PersistentCardSpending persistentCardSpending )
+    {
+        final List<CardDebitProductDTO> cardDebitProductsDTO = debitBalanceRequestDTO.debitProducts();
+        final List<PersistentCardSpendingProduct> products = persistentCardSpending.getProducts();
+        final int expectedSize = cardDebitProductsDTO.size();
+        assertEquals( expectedSize, products.size() );
+        IntStream.range( 0, expectedSize )
+            .forEach( i -> {
+                final PersistentCardSpendingProduct persistentCardSpendingProduct = products.get( i );
+                assertNotNull( persistentCardSpendingProduct.getId() );
+                final CardDebitProductDTO expected = cardDebitProductsDTO.get( i );
+                assertEquals( expected.productName(), persistentCardSpendingProduct.getProductName() );
+                assertEquals( expected.quantity(), persistentCardSpendingProduct.getQuantity() );
+                assertEquals( expected.unitaryPriceCents(), persistentCardSpendingProduct.getUnitaryPriceCents() );
+                assertEquals( persistentCardSpending, persistentCardSpendingProduct.getCardSpending() );
+            } );
     }
 }

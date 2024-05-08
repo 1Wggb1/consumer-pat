@@ -3,20 +3,20 @@ package br.com.alelo.consumer.consumerpat.model.card.calculator;
 public interface DebitBalanceCalculator
 {
     default Long calculateDiscount(
-        final Long value )
+        final Long debitValue )
     {
         return 0L;
     }
 
     default Long calculateTax(
-        final Long value )
+        final Long debitValue )
     {
         return 0L;
     }
 
     default Long calculateTotal(
-        final Long value )
+        final Long debitValue )
     {
-        return value - calculateDiscount( value ) + calculateTax( value );
+        return debitValue - calculateDiscount( debitValue ) + calculateTax( debitValue );
     }
 }

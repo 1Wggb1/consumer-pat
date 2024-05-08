@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 import br.com.alelo.consumer.consumerpat.converter.CardSpendingConverter;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceRequestDTO;
+import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceResponseDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitProductDTO;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentCardSpending;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentCardSpendingProduct;
@@ -49,5 +50,12 @@ public class CardSpendingConverterImpl
             cardDebitProductDTO.quantity(),
             cardDebitProductDTO.unitaryPriceCents(),
             persistentCardSpending );
+    }
+
+    @Override
+    public CardDebitBalanceResponseDTO toDTO(
+        final PersistentCardSpending cardSpending )
+    {
+        return new CardDebitBalanceResponseDTO( cardSpending.getId() );
     }
 }

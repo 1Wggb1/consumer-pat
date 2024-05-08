@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -18,6 +19,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,6 +30,8 @@ import lombok.NoArgsConstructor;
 @Table( name = "card_spending" )
 @NoArgsConstructor
 @EqualsAndHashCode
+@AllArgsConstructor
+@Builder
 public class PersistentCardSpending
 {
     @Id
@@ -47,7 +52,7 @@ public class PersistentCardSpending
     private LocalDateTime purchaseDateTime;
 
     @NotEmpty
-    @OneToMany( mappedBy = "cardSpending", cascade = CascadeType.PERSIST )
+    @OneToMany( mappedBy = "cardSpending", cascade = CascadeType.ALL, fetch = FetchType.EAGER )
     private List<PersistentCardSpendingProduct> products = new ArrayList<>();
 
     @NotNull
