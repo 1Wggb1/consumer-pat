@@ -22,7 +22,6 @@ import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceResponseDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardResponseDTO;
-import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
 import br.com.alelo.consumer.consumerpat.service.card.ConsumerCardService;
 import lombok.extern.log4j.Log4j2;
 
@@ -44,16 +43,6 @@ public class ConsumerCardController
             .buildAndExpand( responseDTO.id() )
             .toUri();
         return ResponseEntity.created( location ).body( responseDTO );
-    }
-
-    @PutMapping( "/{card_id}" )
-    public ResponseEntity<Void> updateCard(
-        @PathVariable( "consumer_id" ) final Integer consumerId,
-        @PathVariable( "card_id" ) final Integer cardId,
-        @Valid @RequestBody final ConsumerCardUpdateRequestDTO consumerCardDTO )
-    {
-        service.updateCard( consumerId, cardId, consumerCardDTO );
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

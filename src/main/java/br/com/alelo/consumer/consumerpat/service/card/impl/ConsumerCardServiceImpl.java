@@ -1,7 +1,6 @@
 package br.com.alelo.consumer.consumerpat.service.card.impl;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,11 +16,8 @@ import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceResponseDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardResponseDTO;
-import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
-import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardInvalidConsumerException;
 import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardNotAcceptedEstablishmentException;
 import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardNotFoundException;
-import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardNumberAlreadyExists;
 import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardsNotFoundException;
 import br.com.alelo.consumer.consumerpat.exception.consumer.ConsumerNotFoundException;
 import br.com.alelo.consumer.consumerpat.model.card.CardEstablishmentType;
@@ -33,6 +29,7 @@ import br.com.alelo.consumer.consumerpat.repository.card.CardSpendingRepository;
 import br.com.alelo.consumer.consumerpat.repository.card.ConsumerCardRepository;
 import br.com.alelo.consumer.consumerpat.repository.consumer.ConsumerRepository;
 import br.com.alelo.consumer.consumerpat.service.card.ConsumerCardService;
+import br.com.alelo.consumer.consumerpat.util.CardNumberGeneratorUtil;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -61,21 +58,20 @@ public class ConsumerCardServiceImpl
     {
         log.info( "Creating... card to consumer id = {}", consumerId );
         final PersistentConsumer persistentConsumer = findConsumerOrThrownException( consumerId );
-        validateIfUniqueCardNumber( consumerCardDTO.number() );
-        final PersistentConsumerCard savedPersistent = consumerCardRepository.save( consumerCardConverter.toModel( consumerCardDTO,
-            persistentConsumer ) );
+        final PersistentConsumerCard savedPersistent = consumerCardRepository.save( consumerCardConverter
+            .toModel( generateUniqueCardNumber(), consumerCardDTO, persistentConsumer ) );
         log.info( "Consumer with id = {} had card with id = {} created successfully",
             consumerId, savedPersistent.getId() );
         return consumerCardConverter.toResponseDTO( savedPersistent );
     }
 
-    private void validateIfUniqueCardNumber(
-        final Long cardNumber )
+    private Long generateUniqueCardNumber()
     {
-        final boolean existByCardNumber = consumerCardRepository.existsByNumber( cardNumber );
-        if( existByCardNumber ) {
-            throw new ConsumerCardNumberAlreadyExists();
+        final Long generatedNumber = CardNumberGeneratorUtil.generateCardNumber();
+        if( consumerCardRepository.existsByNumber( generatedNumber ) ) {
+            return generateUniqueCardNumber();
         }
+        return generatedNumber;
     }
 
     private PersistentConsumer findConsumerOrThrownException(
@@ -83,33 +79,6 @@ public class ConsumerCardServiceImpl
     {
         return consumerRepository.findById( consumerId )
             .orElseThrow( () -> new ConsumerNotFoundException( consumerId ) );
-    }
-
-    @Override
-    @Transactional
-    public void updateCard(
-        final Integer consumerId,
-        final Integer cardId,
-        final ConsumerCardUpdateRequestDTO cardUpdateRequestDTO )
-    {
-        log.info( "Updating... card to consumer id = {}", consumerId );
-        final PersistentConsumerCard persistentConsumerCard = consumerCardRepository.findById( cardId )
-            .orElseThrow( () -> new ConsumerCardNotFoundException( cardId ) );
-        validateIfUniqueCardNumber( cardUpdateRequestDTO.number() );
-        final Integer cardConsumerId = persistentConsumerCard.getConsumer().getId();
-        validateConsumerId( consumerId, cardConsumerId );
-        log.info( "Consumer with id = {} had card with id = {} updated successfully",
-            consumerId, cardId );
-        consumerCardRepository.save( consumerCardConverter.toModel( persistentConsumerCard, cardUpdateRequestDTO ) );
-    }
-
-    private static void validateConsumerId(
-        final Integer consumerId,
-        final Integer cardConsumerId )
-    {
-        if( ! Objects.equals( consumerId, cardConsumerId ) ) {
-            throw new ConsumerCardInvalidConsumerException();
-        }
     }
 
     @Override

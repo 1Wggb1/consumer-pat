@@ -1,6 +1,5 @@
 package br.com.alelo.consumer.consumerpat.service.card.impl;
 
-import static br.com.alelo.consumer.consumerpat.TestData.SECOND_VALID_DOCUMENT_NUMBER_WITHOUT_MASK;
 import static br.com.alelo.consumer.consumerpat.TestData.VALID_DOCUMENT_NUMBER_WITHOUT_MASK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,7 +33,6 @@ import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.CardDebitProductDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardResponseDTO;
-import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
 import br.com.alelo.consumer.consumerpat.model.card.CardEstablishmentType;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentCardSpending;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentCardSpendingProduct;
@@ -74,7 +72,7 @@ class ConsumerCardServiceImplIntegrationTest
         throws Exception
     {
         final PersistentConsumer persistentConsumer = createConsumer( "T", VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
-        final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO( 78899555L, null, CardEstablishmentType.DRUGSTORE.name() );
+        final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO( null, CardEstablishmentType.DRUGSTORE.name() );
         final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post( BASE_PATH, persistentConsumer.getId() )
             .contentType( MediaType.APPLICATION_JSON )
             .content( writeAsJson( cardRequestDTO ) );
@@ -83,13 +81,14 @@ class ConsumerCardServiceImplIntegrationTest
 
         result
             .andExpect( MockMvcResultMatchers.status().isCreated() )
-            .andExpect( jsonPath( "$.id", IsNull.notNullValue() ) );
+            .andExpect( jsonPath( "$.id", IsNull.notNullValue() ) )
+            .andExpect( jsonPath( "$.cardNumber", IsNull.notNullValue() ) );
         final String response = result.andReturn().getResponse().getContentAsString();
         final ConsumerCardResponseDTO responseDTO = readAsObject( response, ConsumerCardResponseDTO.class );
         final PersistentConsumerCard createdConsumerCard = consumerCardRepository.findById( responseDTO.id() )
             .orElseThrow();
         assertNotNull( createdConsumerCard.getId() );
-        assertEquals( cardRequestDTO.number(), createdConsumerCard.getNumber() );
+        assertNotNull( createdConsumerCard.getNumber() );
         assertEqualsCustom( Optional.ofNullable( cardRequestDTO.balanceValue() )
             .orElse( BigDecimal.valueOf( 0L ) ), createdConsumerCard
                 .getBalance() );
@@ -101,7 +100,7 @@ class ConsumerCardServiceImplIntegrationTest
     void shouldReturn404WhenConsumerNotFoundOnCardCreation()
         throws Exception
     {
-        final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO( 78899555L, null, CardEstablishmentType.DRUGSTORE.name() );
+        final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO( null, CardEstablishmentType.DRUGSTORE.name() );
         final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post( BASE_PATH, 788888 )
             .contentType( MediaType.APPLICATION_JSON )
             .content( writeAsJson( cardRequestDTO ) );
@@ -118,14 +117,14 @@ class ConsumerCardServiceImplIntegrationTest
         throws Exception
     {
         final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO(
-            null, MINUS_ONE, null );
+            MINUS_ONE, null );
         final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post( BASE_PATH, 788888 )
             .contentType( MediaType.APPLICATION_JSON )
             .content( writeAsJson( cardRequestDTO ) );
 
         final ResultActions result = mvc.perform( request );
 
-        result.andExpect( jsonPath( "$.errorMessages.length()", Is.is( 3 ) ) );
+        result.andExpect( jsonPath( "$.errorMessages.length()", Is.is( 2 ) ) );
         final ResultMatcher badRequest = MockMvcResultMatchers.status().isBadRequest();
         validateErrorResponse( result, badRequest );
     }
@@ -136,8 +135,7 @@ class ConsumerCardServiceImplIntegrationTest
         throws Exception
     {
         final PersistentConsumer persistentConsumer = createConsumer( "T", VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
-        final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO(
-            788545668L, new BigDecimal( 100L ), "ANYY" );
+        final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO( new BigDecimal( 100L ), "ANYY" );
         final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post( BASE_PATH, persistentConsumer.getId() )
             .contentType( MediaType.APPLICATION_JSON )
             .content( writeAsJson( cardRequestDTO ) );
@@ -147,37 +145,6 @@ class ConsumerCardServiceImplIntegrationTest
         result.andExpect( jsonPath( "$.errorMessages.length()", Is.is( 1 ) ) );
         final ResultMatcher notFound = MockMvcResultMatchers.status().isNotFound();
         validateErrorResponse( result, notFound );
-    }
-
-    @Test
-    @DisplayName( "Deve retornar 204 quando cartão do consumidor atualizado com sucesso." )
-    void shouldReturn204WhenConsumerCardUpdatedSuccessfully()
-        throws Exception
-    {
-        final PersistentConsumer persistentConsumer = createConsumer( "Will", VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
-        final PersistentConsumerCard consumerCard = createConsumerCard( 44445456L,
-            CardEstablishmentType.DRUGSTORE,
-            persistentConsumer );
-        final ConsumerCardUpdateRequestDTO updateCardRequestDTO = new ConsumerCardUpdateRequestDTO(
-            7854455L, CardEstablishmentType.FUEL.name() );
-
-        final Integer consumerId = persistentConsumer.getId();
-        final Integer cardId = consumerCard.getId();
-        final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.put(
-            BASE_PATH + "/{card_Id}", consumerId, cardId )
-            .contentType( MediaType.APPLICATION_JSON )
-            .content( writeAsJson( updateCardRequestDTO ) );
-
-        final ResultActions result = mvc.perform( request );
-        result
-            .andExpect( MockMvcResultMatchers.status().isNoContent() );
-        final PersistentConsumerCard updatedConsumerCard = consumerCardRepository.findById( cardId )
-            .orElseThrow();
-        assertNotNull( updatedConsumerCard.getId() );
-        assertEquals( updateCardRequestDTO.cardEstablishmentType(), updatedConsumerCard.getEstablishmentType().name() );
-        assertEquals( updateCardRequestDTO.number(), updatedConsumerCard.getNumber() );
-        assertEqualsCustom( consumerCard.getBalance(), updatedConsumerCard.getBalance() );
-        assertEquals( consumerCard.getConsumer(), updatedConsumerCard.getConsumer() );
     }
 
     private PersistentConsumerCard createConsumerCard(
@@ -192,50 +159,6 @@ class ConsumerCardServiceImplIntegrationTest
             .balance( ONE )
             .build();
         return consumerCardRepository.save( consumerCard );
-    }
-
-    @Test
-    @DisplayName( "Deve retornar 404 quando cartão do consumidor não encontrado na atualização." )
-    void shouldReturn404WhenConsumerCardNotFoundOnUpdate()
-        throws Exception
-    {
-        final PersistentConsumer persistentConsumer = createConsumer( "Will", VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
-        final ConsumerCardUpdateRequestDTO updateCardRequestDTO = new ConsumerCardUpdateRequestDTO(
-            7854455L, CardEstablishmentType.FUEL.name() );
-
-        final Integer consumerId = persistentConsumer.getId();
-        final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.put(
-            BASE_PATH + "/{card_Id}", consumerId, 7888 )
-            .contentType( MediaType.APPLICATION_JSON )
-            .content( writeAsJson( updateCardRequestDTO ) );
-
-        final ResultActions result = mvc.perform( request );
-
-        final ResultMatcher notFound = MockMvcResultMatchers.status().isNotFound();
-        validateErrorResponse( result, notFound );
-    }
-
-    @Test
-    @DisplayName( "Deve retornar 422 quando consumidor é diferente do que possui o cartão (Não é permitido mudar o cartão de dono)." )
-    void shouldReturn422WhenConsumerIsntSameThanRequestOnCardUpdate()
-        throws Exception
-    {
-        final PersistentConsumer secondPersistentConsumer = createConsumer( "Mari Palma", SECOND_VALID_DOCUMENT_NUMBER_WITHOUT_MASK );
-        final ConsumerCardUpdateRequestDTO updateCardRequestDTO = new ConsumerCardUpdateRequestDTO(
-            7854455L, CardEstablishmentType.FUEL.name() );
-        final PersistentConsumerCard consumerCard = createConsumerCard( 44445456L,
-            CardEstablishmentType.DRUGSTORE,
-            createConsumer( "Will", VALID_DOCUMENT_NUMBER_WITHOUT_MASK ) );
-
-        final MockHttpServletRequestBuilder request = MockMvcRequestBuilders.put(
-            BASE_PATH + "/{card_Id}", secondPersistentConsumer.getId(), consumerCard.getId() )
-            .contentType( MediaType.APPLICATION_JSON )
-            .content( writeAsJson( updateCardRequestDTO ) );
-
-        final ResultActions result = mvc.perform( request );
-
-        final ResultMatcher unprocessableEntity = MockMvcResultMatchers.status().isUnprocessableEntity();
-        validateErrorResponse( result, unprocessableEntity );
     }
 
     @Test

@@ -1,6 +1,7 @@
 package br.com.alelo.consumer.consumerpat.dto.card;
 
 public record ConsumerCardResponseDTO(
-    Integer id )
+    Integer id,
+    Long cardNumber )
 {
 }

@@ -18,7 +18,6 @@ import br.com.alelo.consumer.consumerpat.dto.EntityPageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.PageableDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
-import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
 import br.com.alelo.consumer.consumerpat.exception.card.ConsumerCardEstablishmentTypeNotFoundException;
 import br.com.alelo.consumer.consumerpat.model.card.CardEstablishmentType;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentConsumerCard;
@@ -38,7 +37,7 @@ class ConsumerCardConverterImplTest
     @DisplayName( "Deve retornar persistent a partir do DTO (ConsumerCard)." )
     void shouldReturnPersistentFromDTO()
     {
-        final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO( 55555L,
+        final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO(
             BigDecimal.valueOf( 1000L ),
             CardEstablishmentType.FUEL.name() );
         final PersistentConsumer consumer = PersistentConsumer.builder()
@@ -46,12 +45,13 @@ class ConsumerCardConverterImplTest
             .name( "João" )
             .documentNumber( VALID_DOCUMENT_NUMBER_WITHOUT_MASK )
             .build();
+        final long generatedCardNumber = 88888L;
 
-        final PersistentConsumerCard persistentConsumerCard = subject.toModel( cardRequestDTO, consumer );
+        final PersistentConsumerCard persistentConsumerCard = subject.toModel( generatedCardNumber, cardRequestDTO, consumer );
 
         assertEquals( cardRequestDTO.balanceValue(), persistentConsumerCard.getBalance() );
         assertEquals( cardRequestDTO.cardEstablishmentType(), persistentConsumerCard.getEstablishmentType().name() );
-        assertEquals( cardRequestDTO.number(), persistentConsumerCard.getNumber() );
+        assertEquals( generatedCardNumber, persistentConsumerCard.getNumber() );
         assertEquals( persistentConsumerCard.getConsumer(), consumer );
     }
 
@@ -63,8 +63,7 @@ class ConsumerCardConverterImplTest
     void shouldThrowExceptionWhenCardEstablishmentTypeInvalidOnConversion(
         final String cardEstablishmentType )
     {
-        final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO( 55555L,
-            BigDecimal.valueOf( 1000L ),
+        final ConsumerCardRequestDTO cardRequestDTO = new ConsumerCardRequestDTO( BigDecimal.valueOf( 1000L ),
             cardEstablishmentType );
         final PersistentConsumer consumer = PersistentConsumer.builder()
             .id( 1 )
@@ -72,29 +71,7 @@ class ConsumerCardConverterImplTest
             .documentNumber( VALID_DOCUMENT_NUMBER_WITHOUT_MASK )
             .build();
 
-        assertThrows( ConsumerCardEstablishmentTypeNotFoundException.class, () -> subject.toModel( cardRequestDTO, consumer ) );
-    }
-
-    @Test
-    @DisplayName( "Deve atualizar modelo com dados do DTO." )
-    void shouldUpdateModelFromDTO()
-    {
-        final PersistentConsumerCard consumerCard = PersistentConsumerCard.builder()
-            .id( 1 )
-            .establishmentType( CardEstablishmentType.DRUGSTORE )
-            .consumer( DEFAULT_CONSUMER )
-            .balance( BigDecimal.valueOf( 1000L ) )
-            .number( 154785966555L )
-            .build();
-        final ConsumerCardUpdateRequestDTO cardUpdateRequestDTO = new ConsumerCardUpdateRequestDTO( 78855788L, CardEstablishmentType.FUEL
-            .name() );
-
-        final PersistentConsumerCard persistentConsumerCard = subject.toModel( consumerCard, cardUpdateRequestDTO );
-
-        assertEquals( consumerCard.getId(), persistentConsumerCard.getId() );
-        assertEquals( consumerCard.getBalance(), persistentConsumerCard.getBalance() );
-        assertEquals( cardUpdateRequestDTO.number(), persistentConsumerCard.getNumber() );
-        assertEquals( cardUpdateRequestDTO.cardEstablishmentType(), persistentConsumerCard.getEstablishmentType().name() );
+        assertThrows( ConsumerCardEstablishmentTypeNotFoundException.class, () -> subject.toModel( 8888888L, cardRequestDTO, consumer ) );
     }
 
     @Test

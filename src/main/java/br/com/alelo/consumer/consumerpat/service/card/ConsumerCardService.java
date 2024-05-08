@@ -8,18 +8,12 @@ import br.com.alelo.consumer.consumerpat.dto.card.CardDebitBalanceResponseDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardResponseDTO;
-import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
 
 public interface ConsumerCardService
 {
     ConsumerCardResponseDTO createCard(
         Integer consumerId,
         ConsumerCardRequestDTO consumerCardDTO );
-
-    void updateCard(
-        Integer consumerId,
-        Integer cardId,
-        ConsumerCardUpdateRequestDTO consumerCardDTO );
 
     EntityPageableDTO<ConsumerCardDTO> findConsumersCards(
         Integer consumerId,

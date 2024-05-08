@@ -8,7 +8,6 @@ import br.com.alelo.consumer.consumerpat.converter.card.ConsumerCardConverter;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardRequestDTO;
 import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardResponseDTO;
-import br.com.alelo.consumer.consumerpat.dto.card.ConsumerCardUpdateRequestDTO;
 import br.com.alelo.consumer.consumerpat.model.card.CardEstablishmentType;
 import br.com.alelo.consumer.consumerpat.model.card.PersistentConsumerCard;
 import br.com.alelo.consumer.consumerpat.model.consumer.PersistentConsumer;
@@ -20,11 +19,12 @@ public class ConsumerCardConverterImpl
 {
     @Override
     public PersistentConsumerCard toModel(
+        final Long generatedCardNumber,
         final ConsumerCardRequestDTO consumerCardRequestDTO,
         final PersistentConsumer persistentConsumer )
     {
         return PersistentConsumerCard.builder()
-            .number( consumerCardRequestDTO.number() )
+            .number( generatedCardNumber )
             .balance( Optional.ofNullable( consumerCardRequestDTO.balanceValue() ).orElse( BigDecimal.ZERO ) )
             .consumer( persistentConsumer )
             .establishmentType( CardEstablishmentType.getOrThrownException( consumerCardRequestDTO.cardEstablishmentType() ) )
@@ -35,18 +35,7 @@ public class ConsumerCardConverterImpl
     public ConsumerCardResponseDTO toResponseDTO(
         final PersistentConsumerCard persistentConsumerCard )
     {
-        return new ConsumerCardResponseDTO( persistentConsumerCard.getId() );
-    }
-
-    @Override
-    public PersistentConsumerCard toModel(
-        final PersistentConsumerCard persistentConsumerCard,
-        final ConsumerCardUpdateRequestDTO cardUpdateRequestDTO )
-    {
-        persistentConsumerCard.setNumber( cardUpdateRequestDTO.number() );
-        persistentConsumerCard.setEstablishmentType(
-            CardEstablishmentType.getOrThrownException( cardUpdateRequestDTO.cardEstablishmentType() ) );
-        return persistentConsumerCard;
+        return new ConsumerCardResponseDTO( persistentConsumerCard.getId(), persistentConsumerCard.getNumber() );
     }
 
     @Override
