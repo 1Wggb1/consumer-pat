@@ -54,7 +54,7 @@ public class PersistentCardSpending
 
     @NotEmpty
     @OneToMany( mappedBy = "cardSpending", cascade = CascadeType.ALL, fetch = FetchType.EAGER )
-    private List<PersistentCardSpendingProduct> products = new ArrayList<>();
+    private final List<PersistentCardSpendingProduct> products = new ArrayList<>();
 
     @NotNull
     @ManyToOne
